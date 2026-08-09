@@ -1,0 +1,14 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.tmp
+
+# Logs / caches
+*.log
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
