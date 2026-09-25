@@ -1,0 +1,1730 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>炫彩音乐灯 · 主控板 3D 布局模型</title>
+<style>
+  :root{
+    --bg:#0b0e13;
+    --bg2:#121821;
+    --panel:#151b25;
+    --panel2:#1b2330;
+    --line:#26303f;
+    --line2:#323e50;
+    --fg:#e8eef7;
+    --fg2:#9fb0c6;
+    --fg3:#6d7d92;
+    --acc:#41dcff;
+    --acc2:#ff4fd8;
+    --ok:#5ee6a8;
+    --warn:#ffcc57;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font:14px/1.55 "Microsoft YaHei","PingFang SC","Hiragino Sans GB",system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;overflow:hidden;
+  }
+  .app{display:flex;height:100vh;width:100vw}
+
+  /* ---------- 侧栏 ---------- */
+  .side{
+    width:340px;flex:0 0 340px;height:100%;overflow-y:auto;overflow-x:hidden;
+    background:linear-gradient(180deg,#141b25 0%,#10161f 100%);
+    border-right:1px solid var(--line);
+    padding:16px 16px 40px;
+  }
+  .side::-webkit-scrollbar{width:9px}
+  .side::-webkit-scrollbar-thumb{background:#2b3646;border-radius:9px}
+  .side::-webkit-scrollbar-track{background:transparent}
+  .brand h1{font-size:17px;margin:0 0 4px;letter-spacing:.2px}
+  .brand h1 span{color:var(--acc)}
+  .brand p{margin:0 0 14px;font-size:11.5px;color:var(--fg3);line-height:1.6}
+  .tagline{
+    display:inline-block;font-size:10.5px;color:var(--acc);
+    border:1px solid rgba(65,220,255,.35);background:rgba(65,220,255,.08);
+    border-radius:99px;padding:2px 9px;margin-bottom:10px;
+  }
+  section{margin:0 0 14px;border-top:1px solid var(--line);padding-top:12px}
+  section h2{
+    font-size:11px;letter-spacing:.14em;color:var(--fg3);margin:0 0 9px;
+    text-transform:uppercase;font-weight:600;
+  }
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  button{
+    font:inherit;font-size:12px;color:var(--fg);
+    background:var(--panel2);border:1px solid var(--line2);
+    border-radius:8px;padding:7px 8px;cursor:pointer;transition:.15s;
+  }
+  button:hover{background:#233042;border-color:#43536b}
+  button.on{background:rgba(65,220,255,.16);border-color:var(--acc);color:#d6f6ff}
+  .chk{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--fg2);padding:4px 0;cursor:pointer}
+  .chk input{accent-color:var(--acc);width:14px;height:14px}
+  select{
+    width:100%;font:inherit;font-size:12.5px;color:var(--fg);background:var(--panel2);
+    border:1px solid var(--line2);border-radius:8px;padding:7px 8px;cursor:pointer;
+  }
+  .hint{font-size:11px;color:var(--fg3);margin-top:7px;line-height:1.6}
+
+  /* BOM */
+  .bom{display:flex;flex-direction:column;gap:5px}
+  .row{
+    display:flex;gap:9px;align-items:flex-start;padding:7px 8px;border-radius:8px;
+    background:var(--panel);border:1px solid transparent;cursor:pointer;transition:.13s;
+  }
+  .row:hover{background:var(--panel2);border-color:var(--line2)}
+  .row.on{background:rgba(65,220,255,.12);border-color:var(--acc)}
+  .row .dot{width:7px;height:7px;border-radius:50%;margin-top:6px;flex:0 0 7px;background:var(--fg3)}
+  .row .txt{flex:1;min-width:0}
+  .row .r1{font-size:12px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .r2{font-size:10.5px;color:var(--fg3);margin-top:1px}
+  .row .qty{font-size:10.5px;color:var(--acc);flex:0 0 auto;margin-top:1px}
+
+  /* 详情 */
+  .detail{
+    background:linear-gradient(180deg,#1a2430,#141c26);border:1px solid var(--line2);
+    border-radius:11px;padding:12px;
+  }
+  .detail h3{margin:0 0 2px;font-size:14px}
+  .detail .sub{font-size:11px;color:var(--acc);margin-bottom:9px}
+  .kv{display:grid;grid-template-columns:74px 1fr;gap:3px 8px;font-size:11.5px}
+  .kv dt{color:var(--fg3)}
+  .kv dd{margin:0;color:var(--fg2)}
+  .detail p{font-size:11.5px;color:var(--fg2);margin:9px 0 0;line-height:1.7}
+  .pinmap{width:100%;border-collapse:collapse;font-size:11px}
+  .pinmap td{padding:3px 2px;border-bottom:1px solid #20283441;color:var(--fg2);vertical-align:top}
+  .pinmap td:first-child{color:var(--acc);white-space:nowrap;font-family:ui-monospace,Consolas,monospace}
+  .legend{display:flex;flex-wrap:wrap;gap:5px 12px;font-size:11px;color:var(--fg2)}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .note{font-size:11px;color:var(--fg3);line-height:1.75}
+  .note b{color:var(--fg2);font-weight:600}
+
+  /* ---------- 视口 ---------- */
+  main{position:relative;flex:1;min-width:0;height:100%}
+  canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+  canvas.drag{cursor:grabbing}
+  .float{
+    position:absolute;top:14px;right:14px;display:flex;gap:6px;flex-wrap:wrap;
+    justify-content:flex-end;max-width:calc(100% - 28px);
+  }
+  .float button{backdrop-filter:blur(8px);background:rgba(21,27,37,.82)}
+  /* 加载 / 兜底提示层 */
+  .boot{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:9px;text-align:center;padding:26px;background:radial-gradient(circle at 50% 42%,#182231,#0a0e14 72%);
+    z-index:5;
+  }
+  .boot h2{margin:0;font-size:17px;color:#e8eef7}
+  .boot p{margin:0;font-size:12px;color:#9fb0c6;max-width:560px;line-height:1.75}
+  .boot .tip{font-size:11px;color:#6d7d92;max-width:520px}
+  .boot .spin{
+    width:26px;height:26px;border-radius:50%;border:2.5px solid rgba(65,220,255,.22);
+    border-top-color:#41dcff;animation:sp 900ms linear infinite;margin:4px 0;
+  }
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .boot.noscript{gap:11px}
+  .boot.noscript h2{color:#ffcc57}
+  .boot.noscript b{color:#e8eef7}
+  .boot.noscript hr{width:70%;border:0;border-top:1px solid #26303f;margin:6px 0}
+  .boot img{max-width:min(600px,88%);border:1px solid #26303f;border-radius:10px;margin:2px 0}
+
+  /* ---------- 静态兜底页：打开方式不运行脚本时显示 ---------- */
+  .staticwrap{
+    position:fixed;inset:0;z-index:99;overflow:auto;-webkit-overflow-scrolling:touch;
+    background:#0e1116;color:#e8eef7;padding:22px 16px 70px;
+    font:14px/1.7 "Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  }
+  .staticwrap h1{font-size:20px;margin:0 0 6px}
+  .staticwrap h2{font-size:15px;color:#41dcff;margin:24px 0 8px}
+  .staticwrap .lead{color:#9fb0c6;font-size:12.5px;margin:0 0 12px}
+  .staticwrap .warn{
+    background:rgba(255,204,87,.10);border:1px solid rgba(255,204,87,.42);color:#ffcc57;
+    border-radius:10px;padding:11px 13px;font-size:12.5px;margin:0 0 16px;
+  }
+  .staticwrap .warn b{color:#ffe6a8}
+  .staticwrap img{
+    width:100%;max-width:1100px;display:block;border:1px solid #26303f;
+    border-radius:10px;margin:0 0 6px;background:#0b0e13;
+  }
+  .staticwrap .cap{color:#6d7d92;font-size:11.5px;margin:0 0 20px}
+  .staticwrap table{width:100%;max-width:1100px;border-collapse:collapse;font-size:11.5px}
+  .staticwrap th{background:#0e7f8c;color:#fff;padding:7px 6px;text-align:left;position:sticky;top:0}
+  .staticwrap td{border-bottom:1px solid #26303f;padding:6px;color:#c3d0de;vertical-align:top}
+  .staticwrap tr:nth-child(even) td{background:rgba(255,255,255,.022)}
+  .staticwrap .foot{color:#6d7d92;font-size:11.5px;margin-top:18px}
+  .staticwrap table{border:1px solid #26303f;border-radius:8px;overflow:hidden}
+  .staticwrap .dim{color:#7d8ea3}
+  /* 2D 布局示意（纯 CSS 画，不用图片） */
+  .bwrap{width:100%;max-width:720px;margin:6px 0 8px}
+  .bmain{
+    position:relative;width:100%;padding-top:77.78%;background:#1a6b50;
+    border:1px solid #0c3b2c;border-radius:6px;
+  }
+  .bmain.bpanel{padding-top:100%}
+  .cmp{
+    position:absolute;background:var(--c);border:1px solid rgba(0,0,0,.4);border-radius:2px;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    font:700 clamp(5px,1.35vw,10px)/1 "Microsoft YaHei",system-ui,sans-serif;
+    color:#06131a;letter-spacing:-.2px;
+  }
+  .hole{position:absolute;background:#08131a;border-radius:50%}
+  .leddot{position:absolute;background:#ff4fd8;border-radius:15%}
+  .hud{
+    position:absolute;left:16px;bottom:14px;font-size:11.5px;color:var(--fg3);
+    background:rgba(11,14,19,.66);border:1px solid var(--line);border-radius:9px;
+    padding:7px 11px;backdrop-filter:blur(8px);line-height:1.7;pointer-events:none;
+  }
+  .hud b{color:var(--fg2);font-weight:600}
+  .scalebox{
+    position:absolute;right:16px;bottom:14px;font-size:11px;color:var(--fg3);
+    background:rgba(11,14,19,.66);border:1px solid var(--line);border-radius:9px;
+    padding:7px 11px;backdrop-filter:blur(8px);pointer-events:none;text-align:right;
+  }
+  .scalebox b{color:var(--acc);font-weight:600}
+
+  @media (max-width:900px){
+    .app{flex-direction:column}
+    .side{width:100%;flex:0 0 auto;max-height:42vh;border-right:0;border-bottom:1px solid var(--line)}
+    main{flex:1}
+    .app.hide-side .side{display:none}
+  }
+  .app.hide-side .side{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <span class="tagline">2026 晨电智能杯 · 低年级组 C 题</span>
+      <h1>炫彩音乐灯 · <span>主板 90×70 + 独立灯阵板</span></h1>
+      <p>主板 <b>90 × 70 mm</b>，灯阵板 <b>70 × 70 mm</b>，两块板之间只用一根 3 芯排线连接；主板上放全部电路，灯阵单独一块小板。<br>坐标原点取<b>主板左下角</b>，X 向右、Y 向上，单位 mm；灯阵板在右侧同一平面内一起展示。</p>
+    </div>
+
+    <section>
+      <h2>视角</h2>
+      <div class="btns">
+        <button data-view="iso" class="on">等轴测</button>
+        <button data-view="top">正视图（顶）</button>
+        <button data-view="bottom">背视图（底）</button>
+        <button data-view="side">侧视图</button>
+      </div>
+      <label class="chk" style="margin-top:8px"><input type="checkbox" id="spin">自动旋转</label>
+    </section>
+
+    <section>
+      <h2>显示图层</h2>
+      <label class="chk"><input type="checkbox" id="tLabels" checked>元件标注与位置</label>
+      <label class="chk"><input type="checkbox" id="tZones" checked>功能分区色块</label>
+      <label class="chk"><input type="checkbox" id="tRuler" checked>尺寸标尺与刻度</label>
+      <label class="chk"><input type="checkbox" id="tSilk" checked>板面丝印（板名 / 姓名学号）</label>
+      <label class="chk"><input type="checkbox" id="tPanel" checked>显示独立灯阵模块</label>
+      <label class="chk"><input type="checkbox" id="tExplode">爆炸视图</label>
+    </section>
+
+    <section>
+      <h2>灯阵演示</h2>
+      <select id="pattern">
+        <option value="demo">▶ 自动演示（自检→爱心→箭头→频谱）</option>
+        <option value="heart">品红色爱心（呼吸渐变）</option>
+        <option value="smile">黄色笑脸</option>
+        <option value="arrow">青色右箭头（位移动效）</option>
+        <option value="fft">频谱柱（8 段）</option>
+        <option value="waterfall">频谱瀑布（创新项）</option>
+        <option value="red">全屏红（上电自检）</option>
+        <option value="green">全屏绿（上电自检）</option>
+        <option value="blue">全屏蓝（上电自检）</option>
+        <option value="off">全部熄灭</option>
+      </select>
+      <div class="hint">演示动画对应题目指标 1.1（纯色自检）、1.2（三种预设图案）、1.3（呼吸 / 位移动效）、2.3–2.4（频谱柱）。</div>
+    </section>
+
+    <section>
+      <h2>元件清单与位置（点击定位）</h2>
+      <div class="bom" id="bom"></div>
+    </section>
+
+    <section>
+      <h2>选中元件</h2>
+      <div class="detail" id="detail"></div>
+    </section>
+
+    <section>
+      <h2>MCU 引脚分配（建议）</h2>
+      <table class="pinmap">
+        <tr><td>PA0</td><td>ADC1_IN0 ← 音频调理电路输出（经 1 k + 15 nF 抗混叠）</td></tr>
+        <tr><td>PA6</td><td>TIM3_CH1 → 74AHCT1G125 缓冲 → 灯阵 DIN（5 V 电平）</td></tr>
+        <tr><td>PA9 / PA10</td><td>USART1 TX / RX → 蓝牙模块 RXD / TXD（9600 bps 起）</td></tr>
+        <tr><td>PB5 / PB6 / PB7</td><td>按键 SW1 图案 / SW2 亮度 / SW3 速度</td></tr>
+        <tr><td>PB8</td><td>按键 SW4 → 复位（接 NRST）</td></tr>
+        <tr><td>PA13 / PA14</td><td>SWDIO / SWCLK → 调试排针</td></tr>
+        <tr><td>PA2 / PA3</td><td>USART2 → 扩展 IO 排针（预留）</td></tr>
+        <tr><td>5V / GND</td><td>电源输入与地</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>器件出处对照（题目 / 讲座）</h2>
+      <table class="pinmap">
+        <tr><td>WS2812B 灯珠</td><td>讲座 P7、P10–P12、P29–P30；题目三-6 允许自制灯阵（≥8 像素短边、≥64 颗）</td></tr>
+        <tr><td>C8T6 最小系统板</td><td>讲座 P12「建议使用学生电源，c8t6 最小系统板支持 5V 供电」、P20–P24</td></tr>
+        <tr><td>BT36 / BT24</td><td>讲座 P31「常见的蓝牙串口模块有 BT36（主从一体）、BT24（仅从机）」</td></tr>
+        <tr><td>3.5 mm 插座</td><td>讲座 P13–P15（尺寸 + 触点形式，需实测 Tip / Ring / Sleeve）</td></tr>
+        <tr><td>运算放大器</td><td>讲座 P18「有源方案：运算放大器（拓展）」</td></tr>
+        <tr><td>电阻 / 电容偏置</td><td>讲座 P16–P18（无源偏置方案、偏置目标与波形）</td></tr>
+        <tr><td>按键 + 滤波电容</td><td>讲座 P26–P27「在按键两端加入容值合适的电容」</td></tr>
+        <tr><td>学生电源</td><td>讲座 P9、P12（仪器使用 + 灯阵供电建议）</td></tr>
+        <tr><td>ST-Link / SWD</td><td>讲座 P9、P12（下载调试；警告勿用 ST-Link 的 5V 给灯阵供电）</td></tr>
+        <tr><td>测试端口</td><td>题目三-2「留出必要的测试端口供功能测试」、二-2.2 ADC 测试端口</td></tr>
+      </table>
+      <div class="hint">其余为工艺器件（排针排母、排线、安装孔）与保护器件（保险丝、防反接、钳位、指示灯），不属于题面给定器件，可按需取舍。</div>
+    </section>
+
+    <section>
+      <h2>拓展指标实现方式</h2>
+      <table class="pinmap">
+        <tr><td>2.1 蓝牙</td><td>BT36 串口模块接 USART1（PA9 / PA10），手机端用蓝牙串口助手：远程调亮度与速度、下发 8 字节 8×8 位图并在灯阵显示</td></tr>
+        <tr><td>2.2 音频输入</td><td>J1（PJ-320A）→ 自研调理（100 Ω + 1 µF 隔直 + 10 k/10 k 偏置 + MCP6002 跟随 + 1 k/15 nF 抗混叠）→ J2 ADC 测试端口 → PA0</td></tr>
+        <tr><td>2.3 频谱柱</td><td>软件 FFT / Goertzel 输出 8 根频谱柱；硬件负责采样率稳定：TIM 触发 ADC + DMA 搬运，抗混叠 10.6 kHz</td></tr>
+        <tr><td>2.4 实时性</td><td>256 点 FFT 双缓冲，刷新 ≥ 30 fps，频谱响应延迟 &lt; 0.3 s（指标要求 ≤ 1 s）</td></tr>
+        <tr><td>2.5 其他</td><td>自制 PCB（板上印姓名学号）、自制 8×8 灯阵板、附加灯效（呼吸 / 位移 / 彩虹 / 频谱柱 / 频谱瀑布）；<b>独立供电按要求不做</b></td></tr>
+      </table>
+      <div class="hint">2.1–2.5 里只有独立供电不做；其余全部由现有器件 + 软件完成，不需要再加硬件。</div>
+    </section>
+
+    <section>
+      <h2>怎么打开 / 怎么分享</h2>
+      <div class="note">
+        3D 模型、元件清单、灯效演示<b>全部打包在这一个 .html 文件里</b>，不联网、不需要装任何东西，也不需要随附其它文件。<br><br>
+        <b>电脑：</b>双击文件，用 Chrome / Edge 打开。<br>
+        <b>手机：</b>保存文件后长按 → 「用其他应用打开」→ 浏览器；单指拖动旋转，双指捏合缩放，双指拖动平移。<br>
+        <b>微信 / QQ 里点开没反应？</b>内置预览不运行网页脚本，选「用其他应用打开」即可；也可以直接看随附的 PNG 预览图。
+      </div>
+    </section>
+
+    <section>
+      <h2>配色图例</h2>
+      <div class="legend">
+        <span><i style="background:#17614a"></i>绿色：主板</span>
+        <span><i style="background:#1f5fa8"></i>蓝色：主控模块</span>
+        <span><i style="background:#12315e"></i>深蓝：蓝牙模块</span>
+        <span><i style="background:#e8eef2"></i>白色：灯珠</span>
+        <span><i style="background:#2b2f36"></i>深灰：按键 / 排针</span>
+        <span><i style="background:#c9b189"></i>米色：阻容</span>
+        <span><i style="background:#b9c0c8"></i>银色：连接器</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>设计要点</h2>
+      <div class="note">
+        <b>供电：</b>板载不含电池与充电电路，由外部 5 V（学生电源 / USB 充电器 / 充电宝）经 Type-C 或 2P 排针输入，板上只做保险丝 + 反接保护 + 大容量储能，符合“不要求独立电源”。<br><br>
+        <b>结构：</b>灯阵单独做成 70 × 70 mm 小板，主板与灯阵板之间只用一根 XH2.54-3P 排线（5 V / DIN / GND）连接。灯阵可以立在前面板上，主板藏在底座里；两块板各自独立装配、独立更换。<br><br>
+        <b>灯阵电流：</b>64 颗全白理论上约 3.1 A，因此 XH2.54 每根线只走 1 路、排线要选 24 AWG 以上，主板与灯阵板上都用 ≥2 mm 宽铜并双面铺铜。软件限制亮度上限，实测工作电流建议 ≤ 1.2 A。<br><br>
+        <b>数据驱动：</b>PA6 用 TIM 的 PWM + DMA 产生 WS2812B 归零码（讲座 P29–P30 的思路），再经 SN74AHCT1G125 整形成 5 V 电平、串 100 Ω 后送 J5。这一颗缓冲芯片是文档之外特意加的：灯阵点错图案会直接丢掉指标 1.1–1.3 的分，而它只要几毛钱、SOT-23-5 一个焊盘。<br><br>
+        <b>模拟通道：</b>3.5 mm 插座 L / R 各串 100 Ω 后合并 → 1 µF 隔直 → 10 k/10 k 偏置到 1.65 V（10 µF 去耦）→ MCP6002 单位增益跟随（峰峰值不变）→ 1 k + 15 nF 抗混叠 → ADC 测试端口 + PA0。<br><br>
+        <b>插座的触点形式：</b>3.5 mm 只是尺寸，焊接前必须用通断档实测所选插座的 Tip / Ring / Sleeve 与焊脚对应关系，再回填封装。
+        <br><br>
+        <b>掉电保存：</b>亮度与速度参数直接存在 STM32F103C8T6 内部 Flash 的最后一页（1 KB 一页，程序占用前几页），不需要额外 EEPROM，板面因此可以再省一颗芯片。
+      </div>
+    </section>
+  </aside>
+
+  <main>
+    <canvas id="c"></canvas>
+    <div class="float">
+      <button id="btnReset">重置视角</button>
+      <button id="btnSpin">自动旋转</button>
+      <button id="btnFull">全屏</button>
+      <button id="btnSide">清单</button>
+      <button id="btnStatic">2D 图</button>
+    </div>
+    <div class="hud">拖动 <b>左键</b> 旋转 · 滚轮 <b>缩放</b> · <b>右键</b> 平移 · 点击元件查看详情</div>
+    <div class="scalebox" id="scalebox"></div>
+  </main>
+</div>
+
+<div id="static" class="staticwrap">
+  <h1>炫彩音乐灯 · 3D 硬件方案</h1>
+  <p class="lead">主板 <b>90 × 70 mm</b>（2 层 / 1.6 mm）＋ 独立灯阵板 <b>70 × 70 mm</b>，板间只用一根 3 芯排线（5 V / DIN / GND）。
+  主控 STM32F103C8T6 最小系统板 ｜ 灯阵 8 × 8 WS2812B（64 颗，间距 8 mm）｜ 3.5 mm 音频输入 + 自研调理电路 ｜ 蓝牙 BT36 ｜
+  4 个按键 ｜ 外部 5 V 供电（学生电源 / 充电宝）。拓展指标除“独立供电”外全部实现。</p>
+  <p class="warn" id="staticTip">下面显示的是<b>静态 2D 版</b>：当前打开方式没有运行网页脚本（微信 / QQ 直接预览 .html、或浏览器版本过旧都会这样）。
+  把文件保存后选「用其他应用打开 → 浏览器」，即可看到可旋转、可点选元件的 3D 模型。</p>
+  <h2>① 主板 2D 布局（90 × 70 mm，纯 CSS 按真实坐标绘制）</h2><div class="bwrap"><div class="bmain"><div class="cmp" style="left:90.67%;top:40.00%;width:9.78%;height:11.43%;--c:#ff4fd8">J5</div><div class="cmp" style="left:48.44%;top:16.90%;width:5.33%;height:3.34%;--c:#ff4fd8">U4</div><div class="cmp" style="left:55.78%;top:18.00%;width:1.78%;height:1.14%;--c:#ff4fd8"></div><div class="cmp" style="left:60.22%;top:18.00%;width:1.78%;height:1.14%;--c:#ff4fd8"></div><div class="cmp" style="left:53.61%;top:23.21%;width:2.78%;height:3.57%;--c:#ff4fd8"></div><div class="cmp" style="left:84.89%;top:37.43%;width:3.56%;height:9.43%;--c:#ff4fd8"></div><div class="cmp" style="left:35.94%;top:56.50%;width:59.39%;height:32.71%;--c:#4fa3ff">U1</div><div class="cmp" style="left:65.06%;top:12.00%;width:29.89%;height:18.86%;--c:#5ee6a8">U3</div><div class="cmp" style="left:74.36%;top:30.76%;width:11.29%;height:3.63%;--c:#5ee6a8">J8</div><div class="cmp" style="left:4.89%;top:37.71%;width:8.00%;height:10.29%;--c:#ffcc57">SW1</div><div class="cmp" style="left:18.22%;top:37.71%;width:8.00%;height:10.29%;--c:#ffcc57">SW2</div><div class="cmp" style="left:4.89%;top:52.00%;width:8.00%;height:10.29%;--c:#ffcc57">SW3</div><div class="cmp" style="left:18.22%;top:52.00%;width:8.00%;height:10.29%;--c:#ffcc57">SW4</div><div class="cmp" style="left:8.00%;top:35.86%;width:15.11%;height:28.29%;--c:#ffcc57">C12–C15</div><div class="cmp" style="left:1.33%;top:11.43%;width:11.44%;height:17.14%;--c:#8f7bff">J1</div><div class="cmp" style="left:22.56%;top:15.46%;width:8.22%;height:6.24%;--c:#8f7bff">U2</div><div class="cmp" style="left:16.11%;top:5.54%;width:2.22%;height:1.79%;--c:#8f7bff"></div><div class="cmp" style="left:20.00%;top:5.54%;width:2.22%;height:1.79%;--c:#8f7bff"></div><div class="cmp" style="left:24.11%;top:5.86%;width:1.78%;height:1.14%;--c:#8f7bff"></div><div class="cmp" style="left:28.00%;top:5.86%;width:1.78%;height:1.14%;--c:#8f7bff"></div><div class="cmp" style="left:31.89%;top:5.86%;width:1.78%;height:1.14%;--c:#8f7bff"></div><div class="cmp" style="left:35.78%;top:5.86%;width:1.78%;height:1.14%;--c:#8f7bff"></div><div class="cmp" style="left:39.67%;top:5.86%;width:1.78%;height:1.14%;--c:#8f7bff"></div><div class="cmp" style="left:43.56%;top:5.86%;width:1.78%;height:1.14%;--c:#8f7bff"></div><div class="cmp" style="left:15.78%;top:28.00%;width:1.78%;height:1.14%;--c:#8f7bff"></div><div class="cmp" style="left:20.22%;top:28.00%;width:1.78%;height:1.14%;--c:#8f7bff"></div><div class="cmp" style="left:22.89%;top:26.43%;width:5.33%;height:4.29%;--c:#8f7bff">D2</div><div class="cmp" style="left:31.62%;top:26.76%;width:5.64%;height:3.63%;--c:#8f7bff">J2</div><div class="cmp" style="left:26.28%;top:36.86%;width:9.67%;height:6.29%;--c:#ff7a59">SW5</div><div class="cmp" style="left:28.61%;top:45.57%;width:5.00%;height:4.57%;--c:#ff7a59">F1</div><div class="cmp" style="left:28.72%;top:52.43%;width:4.78%;height:3.71%;--c:#ff7a59">D1</div><div class="cmp" style="left:30.22%;top:59.43%;width:1.78%;height:1.14%;--c:#ff7a59"></div><div class="cmp" style="left:33.89%;top:59.11%;width:2.22%;height:1.79%;--c:#ff7a59"></div><div class="cmp" style="left:29.70%;top:63.51%;width:2.82%;height:7.26%;--c:#ff7a59"></div><div class="cmp" style="left:9.44%;top:83.21%;width:10.00%;height:10.71%;--c:#ffb066">P1</div><div class="cmp" style="left:20.78%;top:83.71%;width:1.78%;height:6.86%;--c:#ffb066"></div><div class="cmp" style="left:24.39%;top:82.94%;width:8.94%;height:11.26%;--c:#ffb066">C4</div><div class="cmp" style="left:8.80%;top:68.19%;width:11.29%;height:3.63%;--c:#57e0e0">J4</div><div class="cmp" style="left:10.21%;top:75.33%;width:8.47%;height:3.63%;--c:#57e0e0">JP1</div><div class="cmp" style="left:21.94%;top:68.21%;width:2.78%;height:3.57%;--c:#57e0e0"></div><div class="cmp" style="left:21.94%;top:75.36%;width:2.78%;height:3.57%;--c:#57e0e0"></div><div class="cmp" style="left:47.48%;top:39.89%;width:2.82%;height:14.51%;--c:#ff4fd8"></div><div class="hole" style="left:2.67%;top:3.43%;width:3.56%;height:4.57%"></div><div class="hole" style="left:93.78%;top:3.43%;width:3.56%;height:4.57%"></div><div class="hole" style="left:2.67%;top:92.00%;width:3.56%;height:4.57%"></div><div class="hole" style="left:93.78%;top:92.00%;width:3.56%;height:4.57%"></div></div></div><p class="cap">方块颜色 = 功能区：紫 音频 ｜ 品红 灯阵接口 ｜ 绿 蓝牙 ｜ 黄 按键 ｜ 橙 电源保护 ｜ 青 调试 ｜ 蓝 主控 ｜ 琥珀 电源输入。方块里是位号，太小的 0603 阻容没标字，按下方清单坐标找。图上：左边缘 = X 0，右边缘 = X 90；下边缘 = Y 0，上边缘 = Y 70。</p>
+  <h2>② 独立灯阵板（70 × 70 mm，8 × 8 WS2812B，间距 8 mm）</h2><div class="bwrap"><div class="bmain bpanel"><div class="cmp" style="left:6.71%;top:2.43%;width:86.57%;height:86.57%;--c:#ff8ad8">LED1–LED64</div><div class="cmp" style="left:4.00%;top:89.71%;width:14.86%;height:9.43%;--c:#ff8ad8">J7</div><div class="cmp" style="left:23.43%;top:93.14%;width:11.00%;height:2.29%;--c:#ff8ad8"></div><div class="leddot" style="left:6.71%;top:2.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:2.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:2.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:2.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:2.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:2.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:2.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:2.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:13.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:13.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:13.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:13.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:13.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:13.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:13.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:13.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:25.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:25.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:25.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:25.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:25.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:25.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:25.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:25.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:36.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:36.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:36.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:36.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:36.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:36.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:36.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:36.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:48.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:48.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:48.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:48.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:48.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:48.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:48.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:48.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:59.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:59.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:59.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:59.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:59.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:59.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:59.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:59.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:71.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:71.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:71.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:71.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:71.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:71.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:71.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:71.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:82.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:82.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:82.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:82.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:82.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:82.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:82.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:82.43%;width:6.57%;height:6.57%"></div><div class="hole" style="left:1.07%;top:1.07%;width:3.57%;height:3.57%"></div><div class="hole" style="left:95.36%;top:1.07%;width:3.57%;height:3.57%"></div><div class="hole" style="left:1.07%;top:95.36%;width:3.57%;height:3.57%"></div><div class="hole" style="left:95.36%;top:95.36%;width:3.57%;height:3.57%"></div></div></div><p class="cap">灯阵板与主板之间只用一根 XH2.54-3P 排线（5 V / DIN / GND）；灯阵板可立在前方，主板藏进底座。</p>
+  <h2>③ 元件清单与位置（共 49 项，坐标为所在板左下角原点，单位 mm）</h2><table><thead><tr><th>板</th><th>位号 / 名称 / 具体型号</th><th>数量</th><th>位置 X / Y</th></tr></thead><tbody><tr><td>灯阵板</td><td><b>LED1–LED64</b> WS2812B 全彩灯珠阵列<br><span class="dim">WS2812B-5050（5050RGB，内置驱动 IC，5 V）</span></td><td>64</td><td>35.0 / 38.0</td></tr><tr><td>灯阵板</td><td><b>M1</b> 灯阵模块板<br><span class="dim">70 × 70 × 1.6 mm 双面 FR-4（也可直接采购成品 8×8 WS2812B 灯板）</span></td><td>1</td><td>35.0 / 35.0</td></tr><tr><td>灯阵板</td><td><b>J7</b> 灯阵板接口<br><span class="dim">XH2.54-3P 弯针插座（配 3 芯排线）</span></td><td>1</td><td>8.0 / 4.0</td></tr><tr><td>灯阵板</td><td><b>C10–C11</b> 灯阵板储能电容<br><span class="dim">10 µF 1206 X5R 25 V</span></td><td>2</td><td>20.0 / 4.0</td></tr><tr><td>主板</td><td><b>J5</b> 灯阵接口（主板侧）<br><span class="dim">XH2.54-3P 直针插座（带扣）</span></td><td>1</td><td>86.0 / 38.0</td></tr><tr><td>主板</td><td><b>U4</b> 灯阵数据电平缓冲<br><span class="dim">SN74AHCT1G125DBVR（SOT-23-5，5 V 供电、输入阈值 2.0 V）</span></td><td>1</td><td>46.0 / 57.0</td></tr><tr><td>主板</td><td><b>C7</b> 缓冲器电源去耦<br><span class="dim">100 nF 0603 X7R 50 V</span></td><td>1</td><td>51.0 / 57.0</td></tr><tr><td>主板</td><td><b>R7</b> 数据线串阻<br><span class="dim">100 Ω 0603 1 %</span></td><td>1</td><td>55.0 / 57.0</td></tr><tr><td>主板</td><td><b>TP3</b> 灯阵数据测试点<br><span class="dim">Ø2 mm 测试环 / 焊盘（内孔 1.0 mm）</span></td><td>1</td><td>49.5 / 52.5</td></tr><tr><td>主板</td><td><b>C8–C9</b> 灯阵母线储能电容<br><span class="dim">10 µF 1206 X5R 25 V</span></td><td>2</td><td>78.0 / 40.5</td></tr><tr><td>主板</td><td><b>U1</b> 主控最小系统板<br><span class="dim">STM32F103C8T6 最小系统板（Blue Pill：板载 8 MHz 晶振 + AMS1117-3.3 + Micro-USB）</span></td><td>1</td><td>59.0 / 19.0</td></tr><tr><td>主板</td><td><b>U3</b> 蓝牙串口模块<br><span class="dim">BT36 蓝牙串口模块（主从一体，26.9 × 13.2 mm）；只需从机可用 BT24</span></td><td>1</td><td>72.0 / 55.0</td></tr><tr><td>主板</td><td><b>J8</b> 蓝牙模块插座<br><span class="dim">1×4P 2.54 mm 排针 + 排母</span></td><td>1</td><td>72.0 / 47.2</td></tr><tr><td>主板</td><td><b>SW1</b> 按键：图案切换<br><span class="dim">6 × 6 × 5 mm 直插轻触开关（TS-1088 系列）</span></td><td>1</td><td>8.0 / 40.0</td></tr><tr><td>主板</td><td><b>SW2</b> 按键：亮度调节<br><span class="dim">6 × 6 × 5 mm 直插轻触开关</span></td><td>1</td><td>20.0 / 40.0</td></tr><tr><td>主板</td><td><b>SW3</b> 按键：速度调节<br><span class="dim">6 × 6 × 5 mm 直插轻触开关</span></td><td>1</td><td>8.0 / 30.0</td></tr><tr><td>主板</td><td><b>SW4</b> 按键：复位<br><span class="dim">6 × 6 × 5 mm 直插轻触开关</span></td><td>1</td><td>20.0 / 30.0</td></tr><tr><td>主板</td><td><b>C12–C15</b> 按键硬件滤波电容<br><span class="dim">100 nF 0603 X7R 50 V</span></td><td>4</td><td>14.0 / 35.0</td></tr><tr><td>主板</td><td><b>J1</b> 3.5 mm 音频输入插座<br><span class="dim">PJ-320A 3.5 mm 立体声母座（5 脚直插）</span></td><td>1</td><td>7.0 / 56.0</td></tr><tr><td>主板</td><td><b>U2</b> 信号调理运放<br><span class="dim">MCP6002T-I/SN（SOP-8，轨到轨，单电源 1.8 ~ 6 V）</span></td><td>1</td><td>24.0 / 57.0</td></tr><tr><td>主板</td><td><b>C1</b> 输入隔直电容<br><span class="dim">1 µF 0805 X7R 25 V</span></td><td>1</td><td>15.5 / 65.5</td></tr><tr><td>主板</td><td><b>C2</b> 偏置去耦电容<br><span class="dim">10 µF 0805 X5R 16 V</span></td><td>1</td><td>19.0 / 65.5</td></tr><tr><td>主板</td><td><b>R1</b> 偏置上电阻<br><span class="dim">10 kΩ 0603 1 %</span></td><td>1</td><td>22.5 / 65.5</td></tr><tr><td>主板</td><td><b>R2</b> 偏置下电阻<br><span class="dim">10 kΩ 0603 1 %</span></td><td>1</td><td>26.0 / 65.5</td></tr><tr><td>主板</td><td><b>C5</b> 运放高频去耦<br><span class="dim">100 nF 0603 X7R 50 V</span></td><td>1</td><td>29.5 / 65.5</td></tr><tr><td>主板</td><td><b>C6</b> 运放低频去耦<br><span class="dim">1 µF 0603 X7R 25 V</span></td><td>1</td><td>33.0 / 65.5</td></tr><tr><td>主板</td><td><b>R4</b> L 声道限流<br><span class="dim">100 Ω 0603 1 %</span></td><td>1</td><td>36.5 / 65.5</td></tr><tr><td>主板</td><td><b>R5</b> R 声道限流<br><span class="dim">100 Ω 0603 1 %</span></td><td>1</td><td>40.0 / 65.5</td></tr><tr><td>主板</td><td><b>R3</b> 抗混叠电阻<br><span class="dim">1 kΩ 0603 1 %</span></td><td>1</td><td>15.0 / 50.0</td></tr><tr><td>主板</td><td><b>C3</b> 抗混叠电容<br><span class="dim">15 nF 0603 X7R 50 V</span></td><td>1</td><td>19.0 / 50.0</td></tr><tr><td>主板</td><td><b>D2</b> ADC 输入钳位<br><span class="dim">BAT54S（SOT-23 双肖特基）</span></td><td>1</td><td>23.0 / 50.0</td></tr><tr><td>主板</td><td><b>J2</b> ADC 输入测试端口<br><span class="dim">1×2P 2.54 mm 排针 + Ø2 mm 测试环</span></td><td>1</td><td>31.0 / 50.0</td></tr><tr><td>主板</td><td><b>SW5</b> 电源总开关<br><span class="dim">SS-12D00G3 拨动开关（3 脚 2 档）</span></td><td>1</td><td>28.0 / 42.0</td></tr><tr><td>主板</td><td><b>F1</b> 自恢复保险丝<br><span class="dim">MF-MSMF200-2（1812 封装，2 A / 8 V）</span></td><td>1</td><td>28.0 / 36.5</td></tr><tr><td>主板</td><td><b>D1</b> 反接保护二极管<br><span class="dim">SS34（SMA，3 A / 40 V 肖特基）</span></td><td>1</td><td>28.0 / 32.0</td></tr><tr><td>主板</td><td><b>R6</b> 电源指示限流电阻<br><span class="dim">1 kΩ 0603 1 %</span></td><td>1</td><td>28.0 / 28.0</td></tr><tr><td>主板</td><td><b>LED1P</b> 电源指示灯<br><span class="dim">0805 绿色 LED（20 mA）</span></td><td>1</td><td>31.5 / 28.0</td></tr><tr><td>主板</td><td><b>J3</b> 备用 5 V 输入<br><span class="dim">1×2P 2.54 mm 排针（可接鳄鱼夹 / 杜邦线）</span></td><td>1</td><td>28.0 / 23.0</td></tr><tr><td>主板</td><td><b>P1</b> Type-C 电源输入座<br><span class="dim">USB Type-C 16P 母座（卧贴，带定位柱）</span></td><td>1</td><td>13.0 / 8.0</td></tr><tr><td>主板</td><td><b>R8–R9</b> Type-C CC 下拉电阻<br><span class="dim">5.1 kΩ 0603 1 %</span></td><td>2</td><td>19.5 / 9.0</td></tr><tr><td>主板</td><td><b>C4</b> 主储能电解电容<br><span class="dim">470 µF / 10 V 铝电解，Ø8 × 12 mm 直插</span></td><td>1</td><td>26.0 / 8.0</td></tr><tr><td>主板</td><td><b>J4</b> SWD 调试排针<br><span class="dim">1×4P 2.54 mm 排针</span></td><td>1</td><td>13.0 / 21.0</td></tr><tr><td>主板</td><td><b>JP1</b> BOOT0 跳线<br><span class="dim">1×3P 2.54 mm 排针 + 跳帽</span></td><td>1</td><td>13.0 / 16.0</td></tr><tr><td>主板</td><td><b>TP1</b> 5 V 测试点<br><span class="dim">Ø2 mm 测试环 / 焊盘（内孔 1.0 mm）</span></td><td>1</td><td>21.0 / 21.0</td></tr><tr><td>主板</td><td><b>TP2</b> GND 测试点<br><span class="dim">Ø2 mm 测试环 / 焊盘</span></td><td>1</td><td>21.0 / 16.0</td></tr><tr><td>主板</td><td><b>J6</b> 扩展 IO 排针<br><span class="dim">1×4P 2.54 mm 排针</span></td><td>1</td><td>44.0 / 37.0</td></tr><tr><td>主板</td><td><b>W1</b> 灯阵连接排线<br><span class="dim">XH2.54-3P 双头线（长度按结构定，建议 20 cm）</span></td><td>1</td><td>99.0 / 20.0</td></tr><tr><td>主板</td><td><b>H1–H4</b> 主板安装孔<br><span class="dim">Ø3.2 mm 通孔 × 4，配 M3 × 6 铜柱 + M3 螺丝</span></td><td>4</td><td>4 / 96 与 4 / 76</td></tr><tr><td>灯阵板</td><td><b>H5–H8</b> 灯阵板安装孔<br><span class="dim">Ø2.5 mm 通孔 × 4，配 M2.5 尼龙柱</span></td><td>4</td><td>2 / 68</td></tr></tbody></table>
+  <p class="foot">交互式 3D 模型（旋转 / 缩放 / 点选元件 / 灯效演示）：用浏览器打开本文件。</p>
+</div>
+
+<script>
+"use strict";
+/*__PART_DATA__*/
+/* =======================================================================
+   1. 板子与布局数据
+   坐标系：布局坐标 (x, y) 以板子左上角为原点，x 向右、y 向下，单位 mm。
+   显示给用户的 PCB 坐标：X = x，Y = 80 - y（原点在板左下角）。
+   ======================================================================= */
+const BOARD = { w:90, h:70, t:1.6, r:2.5 };
+/* 独立的 8×8 灯阵模块（不焊在主板上），坐标为它在同一布局平面中的位置 */
+const PANEL = { w:70, h:70, x:102, y:0, t:1.6, pitch:8.0 };
+/* 主板 → 灯阵板 的 3 芯排线（起止点与弧顶，布局坐标，z 为离板高度） */
+const CABLE = { from:[89.8, 32, 3.5], to:[110, 68.6, 3.5], ctl:[103, 46, 16] };
+
+const C = {
+  mask:   [0x1a,0x6b,0x50],   // 绿油
+  maskEdge:[0x11,0x4a,0x37],
+  copper: [0xa5,0x76,0x3a],   // 底层铜
+  silk:   [0xf2,0xf6,0xfa],   // 丝印
+  bluepill:[0x1f,0x5f,0xa8],
+  bluepillEdge:[0x15,0x46,0x7e],
+  btg:    [0x12,0x31,0x5e],
+  led:    [0xe9,0xef,0xf4],
+  chip:   [0x14,0x16,0x1a],
+  plastic:[0x25,0x29,0x30],
+  metal:  [0xb9,0xc0,0xc8],
+  gold:   [0xcf,0xa9,0x3f],
+  black:  [0x0d,0x0f,0x12],
+  capTan: [0xc9,0xb1,0x89],
+  res:    [0x2a,0x2a,0x2e],
+  capBulk:[0x2d,0x37,0x42],
+  red:    [0xc0,0x3a,0x3a],
+  grey:   [0x8f,0x99,0xa6],
+  hole:   [0x08,0x0a,0x0c]
+};
+
+/* 灯阵图案（1 = 点亮），行序自上而下，与题目“8 字节自高到低、8 行自上而下”一致 */
+const BITS = {
+  heart: ['00000000','01100110','11111111','11111111','11111111','01111110','00111100','00011000'],
+  smile: ['00111100','01000010','10100101','10000001','10100101','10011001','01000010','00111100'],
+  arrow: ['00000000','00011000','00111000','11111111','11111111','00111000','00011000','00000000'],
+  fft:   ['00011000','00011000','00011000','00111100','01111110','01111110','11111111','11111111']
+};
+const OFF_LED = [120,128,140];
+
+/* 功能分区（用于 2D 叠加色块） */
+const ZONES = [
+  { id:'A', name:'音频输入与调理区',  x0:2,   y0:2,   x1:42,  y1:21.5, color:[143,123,255] },
+  { id:'B', name:'灯阵接口与驱动缓冲',x0:43,  y0:2,   x1:58,  y1:26,   color:[255,79,216] },
+  { id:'C', name:'蓝牙通信区',        x0:59,  y0:2,   x1:88,  y1:26,   color:[94,230,168] },
+  { id:'D', name:'交互按键区',        x0:2,   y0:26,  x1:22,  y1:44,   color:[255,204,87] },
+  { id:'E', name:'电源与保护区',      x0:22,  y0:26,  x1:33,  y1:56,   color:[255,122,89] },
+  { id:'F', name:'调试与测试区',      x0:2,   y0:44,  x1:22,  y1:56,   color:[87,224,224] },
+  { id:'H', name:'电源输入与储能区',  x0:2,   y0:56,  x1:33,  y1:68,   color:[255,160,90] },
+  { id:'G', name:'主控区',            x0:31,  y0:39,  x1:90,  y1:68,   color:[79,163,255] },
+  { id:'M', name:'灯阵模块（独立小板）',x0:100, y0:-1, x1:174, y1:71,  color:[255,79,216] }
+];
+
+/* -----------------------------------------------------------------------
+   元件清单（每个元器件的位号、位置、规格、功能）
+   kind 决定 3D 外形；x / y 为元件中心（布局坐标，mm）
+   ----------------------------------------------------------------------- */
+const PARTS = [
+  /* ===== M 独立灯阵模块（单独一块小板，不焊在主机板上） ===== */
+  { ref:'LED1–LED64', name:'WS2812B 全彩灯珠阵列', model:'WS2812B-5050（5050RGB，内置驱动 IC，5 V）',
+    spec:'8 × 8，间距 8 mm，整块约 61 × 61 mm', qty:64,
+    x:137, y:32, zone:'M', pri:3, kind:'ledarray', pitch:8.0,
+    info:'灯阵单独做成一块小板，用 3 芯排线接到主板，主板只留接口与驱动。数据自 LED1（左上）进入，逐行串联到 LED64。题目允许自制灯阵，短边 8 像素、共 64 颗满足第 6 条。' },
+  { ref:'M1', name:'灯阵模块板', model:'70 × 70 × 1.6 mm 双面 FR-4（也可直接采购成品 8×8 WS2812B 灯板）',
+    spec:'70 × 70 mm，2 层板，四角 Ø2.5 安装孔', qty:1, x:137, y:35, zone:'M', pri:3, kind:'panelpcb',
+    info:'灯阵板：正面 64 颗 WS2812B，背面走 5 V/GND 宽铜与数据线，板上并 2 只 10 µF 就近储能。与主板之间只用 3 根线连接，结构上可以把灯阵板立在前面板、主板藏在底座里。' },
+  { ref:'J7', name:'灯阵板接口', model:'XH2.54-3P 弯针插座（配 3 芯排线）', spec:'3P，2.54 mm，开口朝下边缘',
+    qty:1, x:110, y:66, zone:'M', pri:2, kind:'xh3', face:'down',
+    info:'灯阵板电源与数据入口：1-5V、2-DIN、3-GND。丝印必须标清线序，插反会烧灯珠。' },
+  { ref:'C10–C11', name:'灯阵板储能电容', model:'10 µF 1206 X5R 25 V', spec:'1206 × 2', qty:2,
+    x:122, y:66, zone:'M', pri:1, kind:'multi', subs:[{x:120,y:66},{x:124.5,y:66}], rr:[201,177,137],
+    info:'跨接在灯阵板 5 V 与 GND 之间，抑制 64 颗灯珠同时刷新时的母线跌落。' },
+
+  /* ===== B 灯阵接口与数据缓冲（主板侧） ===== */
+  { ref:'J5', name:'灯阵接口（主板侧）', model:'XH2.54-3P 直针插座（带扣）', spec:'3P，2.54 mm，开口朝板右边缘',
+    qty:1, x:86, y:32, zone:'B', pri:3, kind:'xh3', face:'right',
+    info:'主板到灯阵板的 3 芯排线接口：1-5V、2-DIN、3-GND。带扣可以防止测评时被拽掉；两根电源线在板上用 ≥2 mm 宽铜走线。' },
+  { ref:'U4', name:'灯阵数据电平缓冲', model:'SN74AHCT1G125DBVR（SOT-23-5，5 V 供电、输入阈值 2.0 V）',
+    spec:'SOT-23-5', qty:1, x:46, y:13, zone:'B', pri:3, kind:'sot235',
+    info:'本设计在讲座 P29–P30「PWM+DMA 直接驱动」的基础上多加的一颗小芯片：WS2812B 在 5 V 供电时 V(IH) 约 3.5 V，经 D1 降压后约 3.22 V，与 3.3 V GPIO 的输出只剩几十 mV 余量。加一级 AHCT 缓冲后数据高电平直接到 5 V，彻底消除偶发误码（灯阵点错图案会直接丢分，这颗芯片很值）。' },
+  { ref:'C7', name:'缓冲器电源去耦', model:'100 nF 0603 X7R 50 V', spec:'0603', qty:1,
+    x:51, y:13, zone:'B', pri:1, kind:'smd0603', rr:[201,177,137],
+    info:'U4 电源脚就近去耦。' },
+  { ref:'R7', name:'数据线串阻', model:'100 Ω 0603 1 %', spec:'0603', qty:1, x:55, y:13, zone:'B', pri:1,
+    kind:'smd0603', rr:[42,42,48],
+    info:'串在缓冲器输出与 J5 之间，抑制排线反射与过冲，同时限制误接时的电流。' },
+  { ref:'TP3', name:'灯阵数据测试点', model:'Ø2 mm 测试环 / 焊盘（内孔 1.0 mm）', spec:'Ø2.5 mm', qty:1,
+    x:49.5, y:17.5, zone:'B', pri:1, kind:'testpoint',
+    info:'题目三-2 要求留出必要的测试端口。调试灯阵时先在这里看数据波形（归零码的高低电平比例），能立刻区分是「MCU 没发对」还是「灯阵没收到」。' },
+  { ref:'C8–C9', name:'灯阵母线储能电容', model:'10 µF 1206 X5R 25 V', spec:'1206 × 2', qty:2,
+    x:78, y:29.5, zone:'B', pri:1, kind:'multi', subs:[{x:78,y:27},{x:78,y:32}], rr:[201,177,137],
+    info:'放在灯阵接口旁，抑制灯阵刷新瞬间的 5 V 跌落；灯阵板上再并 2 只 10 µF。' },
+
+  /* ===== G 主控区 ===== */
+  { ref:'U1', name:'主控最小系统板', model:'STM32F103C8T6 最小系统板（Blue Pill：板载 8 MHz 晶振 + AMS1117-3.3 + Micro-USB）',
+    spec:'53.3 × 22.9 mm，2 × 20P 排母直插，USB 朝板右边缘', qty:1,
+    x:59, y:51, zone:'G', pri:3, kind:'bluepill', w:53.3, d:22.9, horiz:true,
+    info:'主控模块可插拔，板上焊 2 × 20P 排母。板载 3.3 V LDO 直接给运放与缓冲器供电，省一颗稳压芯片；换模块也不用重新画板。若想让作品更“自制”，可改成 STM32F103C8T6（LQFP-48）+ 8 MHz 晶振 + AMS1117-3.3 直接焊在板上。' },
+
+  /* ===== C 蓝牙通信 ===== */
+  { ref:'U3', name:'蓝牙串口模块', model:'BT36 蓝牙串口模块（主从一体，26.9 × 13.2 mm）；只需从机可用 BT24',
+    spec:'26.9 × 13.2 mm，5 V 供电，默认 9600 bps', qty:1,
+    x:72, y:15, zone:'C', pri:3, kind:'btmodule', w:26.9, d:13.2, horiz:true,
+    info:'串口透传模块，手机端用「蓝牙串口助手」即可连接。TXD/RXD 与 PA9/PA10 交叉相接并共地。用于指标 2.1：远程调亮度与速度、下发 8 字节 8×8 位图并在灯阵上显示。' },
+  { ref:'J8', name:'蓝牙模块插座', model:'1×4P 2.54 mm 排针 + 排母', spec:'1×4，2.54 mm', qty:1,
+    x:72, y:22.8, zone:'C', pri:2, kind:'header1x4',
+    info:'VCC / GND / TXD / RXD 四个脚，用排针排母便于换模块或对比 BT24 / BT36。' },
+
+  /* ===== D 交互按键 ===== */
+  { ref:'SW1', name:'按键：图案切换', model:'6 × 6 × 5 mm 直插轻触开关（TS-1088 系列）', spec:'6×6×5，4 脚直插',
+    qty:1, x:8, y:30, zone:'D', pri:2, kind:'button',
+    info:'在品红爱心 / 黄色笑脸 / 青色右箭头三种预设图案间循环切换（指标 1.2），接 PB5，软件消抖 20 ms。' },
+  { ref:'SW2', name:'按键：亮度调节', model:'6 × 6 × 5 mm 直插轻触开关', spec:'6×6×5，4 脚直插',
+    qty:1, x:20, y:30, zone:'D', pri:2, kind:'button',
+    info:'亮度 3 档以上循环（指标 1.4），接 PB6；通过限制 RGB 数值上限同时压低灯阵电流。' },
+  { ref:'SW3', name:'按键：速度调节', model:'6 × 6 × 5 mm 直插轻触开关', spec:'6×6×5，4 脚直插',
+    qty:1, x:8, y:40, zone:'D', pri:2, kind:'button',
+    info:'呼吸 / 位移等动效的速度 3 档以上循环（指标 1.4），接 PB7，改变刷新周期。' },
+  { ref:'SW4', name:'按键：复位', model:'6 × 6 × 5 mm 直插轻触开关', spec:'6×6×5，4 脚直插',
+    qty:1, x:20, y:40, zone:'D', pri:2, kind:'button',
+    info:'接最小系统板 NRST，可随时重启演示。' },
+  { ref:'C12–C15', name:'按键硬件滤波电容', model:'100 nF 0603 X7R 50 V', spec:'0603 × 4', qty:4,
+    x:14, y:35, zone:'D', pri:1, kind:'multi', subW:1.6, subD:0.8, subH:0.55, rr:[201,177,137],
+    subs:[{x:8,y:25.5},{x:20,y:25.5},{x:8,y:44.5},{x:20,y:44.5}],
+    info:'讲座 P27 明确要求按键加硬件滤波：每个按键两端并一只 100 nF 电容，与软件消抖（20 ms）配合，防止一次按下被识别成多次。按键另一端直接接 GND，GPIO 配置内部上拉，不需要外接上拉电阻。' },
+
+  /* ===== A 音频输入与调理 ===== */
+  { ref:'J1', name:'3.5 mm 音频输入插座', model:'PJ-320A 3.5 mm 立体声母座（5 脚直插）',
+    spec:'Ø3.5 mm，插孔朝板左边缘', qty:1, x:7, y:14, zone:'A', pri:3, kind:'jack',
+    info:'音频输入端。评测时左右声道送同一信号，本设计把 L / R 各串 100 Ω 后合并成一条调理通道。注意：3.5 mm 只是尺寸，实际插座的 Tip / Ring / Sleeve 与焊脚对应关系必须先用通断档实测确认再定封装。' },
+  { ref:'U2', name:'信号调理运放', model:'MCP6002T-I/SN（SOP-8，轨到轨，单电源 1.8 ~ 6 V）',
+    spec:'SOP-8', qty:1, x:24, y:13, zone:'A', pri:3, kind:'sop8',
+    info:'A 路做单位增益电压跟随，把偏置后的音频低阻送入 ADC；B 路做 1.65 V 虚拟地缓冲，给偏置网络提供低阻抗参考。轨到轨输出保证 0 ~ 3.3 V 内不削波，峰峰值与输入保持一致。' },
+  { ref:'C1', name:'输入隔直电容', model:'1 µF 0805 X7R 25 V', spec:'0805', qty:1, x:15.5, y:4.5, zone:'A', pri:1,
+    kind:'smd0805', rr:[213,196,160], info:'隔断输入信号的直流分量，只保留交流音频；与后级 10 k 偏置电阻构成约 16 Hz 高通。' },
+  { ref:'C2', name:'偏置去耦电容', model:'10 µF 0805 X5R 16 V', spec:'0805', qty:1, x:19, y:4.5, zone:'A', pri:1,
+    kind:'smd0805', rr:[201,177,137], info:'并接在 10 k/10 k 分压点与地之间，把偏置参考的交流阻抗压到很低，避免音频被分压网络衰减。' },
+  { ref:'R1', name:'偏置上电阻', model:'10 kΩ 0603 1 %', spec:'0603', qty:1, x:22.5, y:4.5, zone:'A', pri:1,
+    kind:'smd0603', rr:[42,42,48], info:'3.3 V → 偏置节点，与 R2 组成 1 : 1 分压，得到 1.65 V 直流工作点。' },
+  { ref:'R2', name:'偏置下电阻', model:'10 kΩ 0603 1 %', spec:'0603', qty:1, x:26, y:4.5, zone:'A', pri:1,
+    kind:'smd0603', rr:[42,42,48], info:'偏置节点 → GND，与 R1 组成分压。' },
+  { ref:'C5', name:'运放高频去耦', model:'100 nF 0603 X7R 50 V', spec:'0603', qty:1, x:29.5, y:4.5, zone:'A', pri:1,
+    kind:'smd0603', rr:[201,177,137], info:'U2 电源脚高频去耦，紧贴器件放置。' },
+  { ref:'C6', name:'运放低频去耦', model:'1 µF 0603 X7R 25 V', spec:'0603', qty:1, x:33, y:4.5, zone:'A', pri:1,
+    kind:'smd0603', rr:[213,196,160], info:'U2 电源脚低频去耦，与 C5 并联。' },
+  { ref:'R4', name:'L 声道限流', model:'100 Ω 0603 1 %', spec:'0603', qty:1, x:36.5, y:4.5, zone:'A', pri:1,
+    kind:'smd0603', rr:[42,42,48], info:'L 声道支路限流，与 R5 一起把两个声道合并到同一调理通道。' },
+  { ref:'R5', name:'R 声道限流', model:'100 Ω 0603 1 %', spec:'0603', qty:1, x:40, y:4.5, zone:'A', pri:1,
+    kind:'smd0603', rr:[42,42,48], info:'R 声道支路限流。两路 100 Ω 后并接，等效 50 Ω 源阻抗。' },
+  { ref:'R3', name:'抗混叠电阻', model:'1 kΩ 0603 1 %', spec:'0603', qty:1, x:15, y:20, zone:'A', pri:1,
+    kind:'smd0603', rr:[42,42,48], info:'运放输出到 ADC 输入之间串联，与 C3 构成一阶低通。' },
+  { ref:'C3', name:'抗混叠电容', model:'15 nF 0603 X7R 50 V', spec:'0603', qty:1, x:19, y:20, zone:'A', pri:1,
+    kind:'smd0603', rr:[201,177,137], info:'与 R3 组成约 10.6 kHz 低通，兼顾采样率余量（3.2 kHz 谐波仍在带内）与抗混叠。' },
+  { ref:'D2', name:'ADC 输入钳位', model:'BAT54S（SOT-23 双肖特基）', spec:'SOT-23', qty:1, x:23, y:20, zone:'A', pri:1,
+    kind:'sot23', info:'把 ADC 输入端钳在 −0.3 V ~ 3.6 V，防止插入瞬间的尖峰或带电插拔损坏 MCU 的 ADC 引脚。' },
+  { ref:'J2', name:'ADC 输入测试端口', model:'1×2P 2.54 mm 排针 + Ø2 mm 测试环', spec:'1×2，2.54 mm', qty:1,
+    x:31, y:20, zone:'A', pri:2, kind:'header1x2',
+    info:'题目指标 2.2 要求预留的 ADC 测试端口。1 脚 = 调理后信号，2 脚 = GND。此处用示波器应看到与输入频率、峰峰值相同、处于 0 ~ 3.3 V 内且无明显失真的波形。' },
+
+  /* ===== E 电源与保护 ===== */
+  { ref:'SW5', name:'电源总开关', model:'SS-12D00G3 拨动开关（3 脚 2 档）', spec:'8.7 × 4.4 mm 直插',
+    qty:1, x:28, y:28, zone:'E', pri:3, kind:'slide',
+    info:'整板 5 V 总开关，断开后灯阵、主控、蓝牙、调理电路全部断电，方便反复上电验证指标 1.5 的掉电保存。' },
+  { ref:'F1', name:'自恢复保险丝', model:'MF-MSMF200-2（1812 封装，2 A / 8 V）', spec:'1812', qty:1,
+    x:28, y:33.5, zone:'E', pri:2, kind:'fuse',
+    info:'限制灯阵短路或误接时的总电流，保护电源和板面走线。' },
+  { ref:'D1', name:'反接保护二极管', model:'SS34（SMA，3 A / 40 V 肖特基）', spec:'SMA', qty:1,
+    x:28, y:38, zone:'E', pri:2, kind:'sma',
+    info:'防止电源正负反接。压降约 0.4 V，灯阵实际工作电压约 4.6 V，同时也降低了 WS2812B 的高电平门限，对 3.3 V 逻辑更友好。' },
+  { ref:'R6', name:'电源指示限流电阻', model:'1 kΩ 0603 1 %', spec:'0603', qty:1,
+    x:28, y:42, zone:'E', pri:1, kind:'smd0603', rr:[42,42,48], info:'电源指示灯限流。' },
+  { ref:'LED1P', name:'电源指示灯', model:'0805 绿色 LED（20 mA）', spec:'0805', qty:1,
+    x:31.5, y:42, zone:'E', pri:2, kind:'ledsmd', rr:[60,220,120], info:'上电指示。' },
+  { ref:'J3', name:'备用 5 V 输入', model:'1×2P 2.54 mm 排针（可接鳄鱼夹 / 杜邦线）', spec:'1×2 竖排', qty:1,
+    x:28, y:47, zone:'E', pri:2, kind:'header1x2v',
+    info:'第二路 5 V 输入，直接接学生电源；与 Type-C 并联，二者只能选一个供电。' },
+
+  /* ===== H 电源输入与储能 ===== */
+  { ref:'P1', name:'Type-C 电源输入座', model:'USB Type-C 16P 母座（卧贴，带定位柱）', spec:'开口朝板下边缘',
+    qty:1, x:13, y:62, zone:'H', pri:3, kind:'usbc',
+    info:'5 V 主电源输入，充电宝 / 手机充电器都能用（题目不要求独立电源）。CC1、CC2 各接 5.1 kΩ 下拉，兼容 C-to-C 线缆；板上只取 VBUS 与 GND。' },
+  { ref:'R8–R9', name:'Type-C CC 下拉电阻', model:'5.1 kΩ 0603 1 %', spec:'0603 × 2', qty:2,
+    x:19.5, y:61, zone:'H', pri:1, kind:'multi', subs:[{x:19.5,y:59},{x:19.5,y:63}],
+    subW:1.6, subD:0.8, subH:0.55, rr:[42,42,48],
+    info:'CC1 / CC2 各一只，保证用 C-to-C 线也能正常取到 5 V。' },
+  { ref:'C4', name:'主储能电解电容', model:'470 µF / 10 V 铝电解，Ø8 × 12 mm 直插', spec:'Ø8，直插', qty:1,
+    x:26, y:62, zone:'H', pri:2, kind:'ecap',
+    info:'吸收灯阵刷新瞬间的大电流脉冲，稳定 5 V 母线；与灯阵接口旁的 2 只 10 µF、灯阵板上的 2 只 10 µF 配合使用。' },
+
+  /* ===== F 调试与测试 ===== */
+  { ref:'J4', name:'SWD 调试排针', model:'1×4P 2.54 mm 排针', spec:'1×4，2.54 mm', qty:1,
+    x:13, y:49, zone:'F', pri:3, kind:'header1x4',
+    info:'3V3 / SWDIO / SWCLK / GND，配 ST-Link 下载与在线调试，与最小系统板的 PA13 / PA14 相连。' },
+  { ref:'JP1', name:'BOOT0 跳线', model:'1×3P 2.54 mm 排针 + 跳帽', spec:'1×3，2.54 mm', qty:1,
+    x:13, y:54, zone:'F', pri:2, kind:'header1x3',
+    info:'BOOT0 选择跳线（0 / 1），便于串口下载与异常时强制进入 Bootloader。' },
+  { ref:'TP1', name:'5 V 测试点', model:'Ø2 mm 测试环 / 焊盘（内孔 1.0 mm）', spec:'Ø2.5 mm', qty:1,
+    x:21, y:49, zone:'F', pri:2, kind:'testpoint',
+    info:'5 V 母线测试点，用万用表 / 示波器测灯阵实际电流与电压跌落。' },
+  { ref:'TP2', name:'GND 测试点', model:'Ø2 mm 测试环 / 焊盘', spec:'Ø2.5 mm', qty:1,
+    x:21, y:54, zone:'F', pri:2, kind:'testpoint',
+    info:'参考地测试点，示波器地线就近接地，减小地线环路噪声。' },
+  { ref:'J6', name:'扩展 IO 排针', model:'1×4P 2.54 mm 排针', spec:'1×4 竖排', qty:1,
+    x:44, y:33, zone:'B', pri:2, kind:'header1x4v',
+    info:'预留 PA2 / PA3（USART2）与 3.3 V / GND，可扩展频谱瀑布、额外传感器等创新项。' },
+
+  /* ===== 连接排线 ===== */
+  { ref:'W1', name:'灯阵连接排线', model:'XH2.54-3P 双头线（长度按结构定，建议 20 cm）', spec:'3 芯：5 V / DIN / GND',
+    qty:1, x:99, y:50, zone:'B', pri:2, kind:'cable',
+    info:'主板 J5 ↔ 灯阵板 J7，两端线序必须一一对应（5V-DIN-GND），插反会烧灯珠；建议两端做不同颜色热缩管标记。' },
+
+  /* ===== 安装孔 ===== */
+  { ref:'H1–H4', name:'主板安装孔', model:'Ø3.2 mm 通孔 × 4，配 M3 × 6 铜柱 + M3 螺丝', spec:'Ø3.2 mm，四角',
+    qty:4, x:45, y:35, zone:'—', pri:1, kind:'holes',
+    info:'主板四角 M3 安装孔，用铜柱固定在亚克力 / 3D 打印底座里。' },
+  { ref:'H5–H8', name:'灯阵板安装孔', model:'Ø2.5 mm 通孔 × 4，配 M2.5 尼龙柱', spec:'Ø2.5 mm，四角',
+    qty:4, x:137, y:35, zone:'M', pri:1, kind:'holepanel',
+    info:'灯阵板四角小孔，用尼龙柱或前面板固定；灯阵板可以立在前面板上，主板藏在底座里，中间只用 3 芯排线连接。' }
+];
+
+/* MCU 引脚分配（用于侧栏表格，已在 HTML 中静态给出） */
+/*__PART_GEOM__*/
+/* =======================================================================
+   2. 几何构建：把元件清单变成三角/四边面网格
+   ======================================================================= */
+const MESHES = [];
+const PART_BY_REF = new Map();
+PARTS.forEach(p => PART_BY_REF.set(p.ref, p));
+const ledWindows = [];          // 64 个灯珠发光面，用于切换图案
+
+/* 布局坐标 → 世界坐标（世界：X 右、Y 上、Z 向上，原点在板中心） */
+function W3(x, y, z){ return [x - BOARD.w / 2, BOARD.h / 2 - y, z]; }
+
+function addMesh(verts, faces, color, ref, opts){
+  const o = opts || {};
+  MESHES.push({
+    v: verts, f: faces, color: color.slice(),
+    fc: o.faceColors || null,
+    ref: ref, part: ref ? PART_BY_REF.get(ref) : null,
+    emissive: !!o.emissive,
+    ex: o.ex === undefined ? 0 : o.ex
+  });
+}
+
+/* 长方体：中心 (cx,cy)，z0 起，沿 x/y/z 尺寸 w,d,h */
+function box(cx, cy, z0, w, d, h, color, ref, opts){
+  const X0 = cx - w / 2, X1 = cx + w / 2;
+  const Y0 = cy - d / 2, Y1 = cy + d / 2;
+  const a = W3(X0, Y1, z0), b = W3(X1, Y1, z0), c = W3(X1, Y0, z0), e = W3(X0, Y0, z0);
+  const A = W3(X0, Y1, z0 + h), B = W3(X1, Y1, z0 + h), Cc = W3(X1, Y0, z0 + h), E = W3(X0, Y0, z0 + h);
+  const v = [].concat(a, b, c, e, A, B, Cc, E);
+  const f = [
+    [4, 5, 6, 7],   // 顶 +z
+    [0, 3, 2, 1],   // 底 -z
+    [0, 1, 5, 4],   // 世界 -y 面
+    [2, 3, 7, 6],   // 世界 +y 面
+    [3, 0, 4, 7],   // 世界 -x 面
+    [1, 2, 6, 5]    // 世界 +x 面
+  ];
+  addMesh(v, f, color, ref, opts);
+}
+
+/* 圆柱：起点 (ax,ay,az)，沿 along = 'x'|'y'|'z' 长 len，半径 r（布局坐标） */
+function cyl(ax, ay, az, along, len, r, color, ref, opts, seg){
+  seg = seg || 18;
+  const n = seg, v = [], f = [];
+  const pt = (t, ang) => {
+    const cc = Math.cos(ang), ss = Math.sin(ang);
+    if (along === 'z') return W3(ax + r * cc, ay + r * ss, az + t * len);
+    if (along === 'x') return W3(ax + t * len, ay + r * cc, az + r * ss);
+    return W3(ax + r * cc, ay + t * len, az + r * ss);
+  };
+  for (let i = 0; i < n; i++){
+    const a0 = i / n * Math.PI * 2, a1 = (i + 1) / n * Math.PI * 2;
+    v.push(...pt(0, a0), ...pt(0, a1), ...pt(1, a1), ...pt(1, a0));
+    f.push([i * 4, i * 4 + 3, i * 4 + 2, i * 4 + 1]);
+  }
+  const cStart = along === 'z' ? W3(ax, ay, az) : (along === 'x' ? W3(ax, ay, az) : W3(ax, ay, az));
+  const cEnd = along === 'z' ? W3(ax, ay, az + len) : (along === 'x' ? W3(ax + len, ay, az) : W3(ax, ay + len, az));
+  const iEnd = v.length / 3; v.push(...cEnd);
+  const iStart = v.length / 3; v.push(...cStart);
+  for (let i = 0; i < n; i++){
+    const k = i * 4, k2 = ((i + 1) % n) * 4;
+    f.push([iEnd, k2, k]);
+    f.push([iStart, k + 1, k2 + 1]);
+  }
+  addMesh(v, f, color, ref, opts);
+}
+
+/* 贴片阻容 */
+function smd(cx, cy, w, d, h, body, ref, opts, ex){
+  opts = opts || {}; opts.ex = ex || 0;
+  box(cx, cy, 0.02, w, d, h, body, ref, opts);
+  const t = w * 0.22;
+  box(cx - w / 2 + t / 2, cy, 0.02, t, d, h * 1.05, C.metal, ref, opts);
+  box(cx + w / 2 - t / 2, cy, 0.02, t, d, h * 1.05, C.metal, ref, opts);
+}
+
+/* 排针（dir: 'x' 沿 x 排布，'y' 沿 y 排布） */
+function header(cx, cy, n, dir, ref, opts){
+  opts = opts || {}; opts.ex = opts.ex || 5;
+  const L = n * 2.54;
+  const w = dir === 'x' ? L : 2.54, d = dir === 'x' ? 2.54 : L;
+  box(cx, cy, 0, w, d, 2.54, C.plastic, ref, opts);
+  for (let i = 0; i < n; i++){
+    const off = (i - (n - 1) / 2) * 2.54;
+    const px = dir === 'x' ? cx + off : cx, py = dir === 'x' ? cy : cy + off;
+    box(px, py, 2.54, 0.64, 0.64, 5.6, C.gold, ref, opts);
+  }
+}
+
+/* ---------------- 各类元件外形 ---------------- */
+
+function buildLEDArray(p){
+  const n = 8, pitch = p.pitch;
+  const x0 = p.x - pitch * (n - 1) / 2, y0 = p.y - pitch * (n - 1) / 2;
+  for (let j = 0; j < n; j++){
+    for (let i = 0; i < n; i++){
+      const cx = x0 + i * pitch, cy = y0 + j * pitch;
+      const o = { ex: 12, faceColors: { top: C.led } };
+      box(cx, cy, 0, 4.6, 4.6, 0.9, C.led, p.ref, o);                 // 封装基座
+      box(cx - 1.75, cy - 1.75, 0.9, 0.9, 0.9, 0.25, C.metal, p.ref, o); // 引脚 1 标记
+      o.faceColors = null;
+      box(cx, cy, 0.9, 3.5, 3.5, 0.8, OFF_LED, p.ref, { ex:12, emissive:true });
+      ledWindows.push({ mesh: MESHES[MESHES.length - 1], i, j });
+    }
+  }
+}
+
+/* 最小系统板：支持横放（USB 朝右）与竖放两种姿态 */
+function buildBluePill(p){
+  const horiz = !!p.horiz, cx = p.x, cy = p.y;
+  const L = horiz ? p.w : p.d;          // 长边 53.3
+  const S = horiz ? p.d : p.w;          // 短边 22.9
+  const off = S / 2 - 1.27;
+  const P = (a, b) => horiz ? [cx + a, cy + b] : [cx + b, cy + a];   // a 沿长边, b 沿短边
+  const D = (l, s) => horiz ? [l, s] : [s, l];
+  /* 两条 2×20 排母 */
+  [-off, off].forEach(b => {
+    const q = P(0, b), dd = D(L, 2.54);
+    box(q[0], q[1], 0, dd[0], dd[1], 8.5, C.plastic, p.ref, { ex: 4 });
+  });
+  /* 模块 PCB */
+  box(cx, cy, 8.5, p.w, p.d, 1.6, C.bluepill, p.ref, { ex: 9, faceColors: { bottom: C.bluepillEdge } });
+  const put = (a, b, w, d, h, col) => {
+    const q = P(a, b), dd = D(w, d);
+    box(q[0], q[1], 10.1, dd[0], dd[1], h, col, p.ref, { ex: 15 });
+  };
+  put(0, 0, 7.0, 7.0, 1.4, C.chip);                 // STM32F103C8T6
+  put(-L / 2 + 5.0, 0, 3.4, 3.0, 1.3, C.chip);      // AMS1117-3.3
+  put(-L / 2 + 12.5, 0, 4.2, 3.0, 1.2, C.metal);    // 8 MHz 晶振
+  put(L / 2 - 7.0, -2.2, 4.4, 4.4, 1.6, C.plastic); // 复位按键
+  put(L / 2 - 3.7, 0, 7.7, 6.2, 2.9, C.metal);      // Micro-USB
+  /* 排母焊脚（示意） */
+  for (let i = 0; i < 20; i++){
+    const a = -L / 2 + 1.27 + i * ((L - 2.54) / 19);
+    [-off, off].forEach(b => {
+      const q = P(a, b);
+      box(q[0], q[1], 8.5, 0.5, 0.5, 0.2, C.gold, p.ref, { ex: 4 });
+    });
+  }
+}
+
+function buildBT(p){
+  const cx = p.x, cy = p.y, horiz = !!p.horiz;
+  /* 模块本体坐在 J8 排针座上，z 从 8.2 起（排针高 8.14） */
+  box(cx, cy, 8.2, p.w, p.d, 1.0, C.btg, p.ref, { ex: 9 });
+  if (horiz){
+    box(cx - 4.0, cy, 9.5, 6.2, 5.2, 1.3, C.chip, p.ref, { ex: 14 });
+    box(cx + 7.5, cy + 2.2, 9.5, 2.6, 2.4, 0.6, C.metal, p.ref, { ex: 14 });
+    for (let i = 0; i < 3; i++)
+      box(cx - p.w / 2 + 2.6 + i * 1.8, cy, 9.5, 0.8, 8.0, 0.25, C.gold, p.ref, { ex: 14 });
+  } else {
+    box(cx, cy + 2.0, 9.5, 6.2, 5.2, 1.3, C.chip, p.ref, { ex: 14 });
+    box(cx + 4.4, cy - 4.0, 9.5, 2.6, 2.4, 0.6, C.metal, p.ref, { ex: 14 });
+    for (let i = 0; i < 3; i++)
+      box(cx, cy - p.d / 2 + 3.2 + i * 2.0, 9.5, 9.0, 0.7, 0.25, C.gold, p.ref, { ex: 14 });
+  }
+}
+
+/* XH2.54-3P 卧式插座：face 指定插口朝向（'right' / 'down'） */
+function buildXH3(p){
+  const w = p.face === 'down' ? 8.0 : 6.4;
+  const d = p.face === 'down' ? 6.4 : 8.0;
+  box(p.x, p.y, 0, w, d, 7.0, [0xef,0xf1,0xf4], p.ref, { ex: 5, faceColors: { top: [0xf7,0xf9,0xfb] } });
+  if (p.face === 'right') box(p.x + w / 2 - 1.0, p.y, 2.2, 2.4, 5.6, 4.2, C.hole, p.ref, { ex: 5 });
+  else box(p.x, p.y + d / 2 - 1.0, 2.2, 5.6, 2.4, 4.2, C.hole, p.ref, { ex: 5 });
+  box(p.x - w / 2 - 0.6, p.y, 0, 1.2, d * 0.55, 3.0, [0xdf,0xe2,0xe6], p.ref, { ex: 5 });
+  box(p.x + w / 2 + 0.6, p.y, 0, 1.2, d * 0.55, 3.0, [0xdf,0xe2,0xe6], p.ref, { ex: 5 });
+}
+
+/* 独立灯阵板底板（70 × 70） */
+function buildPanel(p){
+  const cx = PANEL.x + PANEL.w / 2, cy = PANEL.y + PANEL.h / 2;
+  box(cx, cy, -PANEL.t, PANEL.w, PANEL.h, PANEL.t, C.mask, p.ref, {
+    ex: 0, faceColors: { top: C.mask, bottom: C.maskEdge, side: C.maskEdge }
+  });
+  box(cx, cy, -PANEL.t - 0.15, PANEL.w - 1.2, PANEL.h - 1.2, 0.10, C.copper, p.ref, { ex: 0 });
+  box(cx + 18.0, cy - 6.0, -PANEL.t - 0.30, 2.5, 50.0, 0.10, [0xe8,0xb0,0x60], p.ref, { ex: 0 });
+  box(cx + 21.5, cy - 6.0, -PANEL.t - 0.30, 2.5, 50.0, 0.10, [0xe8,0xb0,0x60], p.ref, { ex: 0 });
+}
+
+/* 主板 → 灯阵板 的 3 芯排线（二次贝塞尔曲线） */
+function buildCable(p){
+  const A = CABLE.from, B = CABLE.to, K = CABLE.ctl, N = 26;
+  for (let i = 0; i <= N; i++){
+    const t = i / N, u = 1 - t;
+    const x = u*u*A[0] + 2*u*t*K[0] + t*t*B[0];
+    const y = u*u*A[1] + 2*u*t*K[1] + t*t*B[1];
+    const z = u*u*A[2] + 2*u*t*K[2] + t*t*B[2];
+    const col = (i < 2 || i > N - 2) ? [0xf0,0xd0,0x40] : [0x2b,0x30,0x38];
+    box(x, y, z, 2.2, 2.2, 1.9, col, p.ref, { ex: 2 });
+  }
+}
+
+function buildButton(p){
+  box(p.x, p.y, 0, 6.0, 6.0, 4.3, C.plastic, p.ref, { ex: 6 });
+  cyl(p.x, p.y, 4.3, 'z', 1.0, 1.8, C.grey, p.ref, { ex: 12 });
+  for (const sx of [-1, 1]) for (const sy of [-1, 1])
+    box(p.x + sx * 3.2, p.y + sy * 3.2, 0, 0.8, 0.8, 4.5, C.metal, p.ref, { ex: 6 });
+}
+
+function buildJack(p){
+  const w = 9, d = 12;
+  box(p.x, p.y, 0, w, d, 10.5, C.black, p.ref, { ex: 6, faceColors: { top: [0x33,0x37,0x3d] } });
+  cyl(p.x - w / 2 - 1.0, p.y, 5.2, 'x', 4.2, 3.0, C.metal, p.ref, { ex: 6 }, 20);
+  cyl(p.x - w / 2 - 1.3, p.y, 5.2, 'x', 0.9, 1.5, C.hole, p.ref, { ex: 6 }, 16);
+  box(p.x + w / 2 - 1.2, p.y, 0, 2.4, 4.0, 3.0, C.plastic, p.ref, { ex: 6 });
+}
+
+function buildSOP8(p){
+  box(p.x, p.y, 0.12, 5.0, 4.0, 1.5, C.chip, p.ref, { ex: 7 });
+  for (let i = 0; i < 4; i++){
+    const y = p.y - 1.9 + i * 1.27;
+    box(p.x - 2.9, y, 0.02, 1.6, 0.55, 0.28, C.metal, p.ref, { ex: 7 });
+    box(p.x + 2.9, y, 0.02, 1.6, 0.55, 0.28, C.metal, p.ref, { ex: 7 });
+  }
+  cyl(p.x - 1.5, p.y - 1.2, 1.62, 'z', 0.02, 0.35, C.grey, p.ref, { ex: 7 }, 12);
+}
+
+function buildSOT(p, five){
+  const w = 3.0, d = five ? 1.7 : 3.0;
+  box(p.x, p.y, 0.12, w, d, 1.15, C.chip, p.ref, { ex: 6 });
+  const left = five ? 3 : 2, right = five ? 2 : 1;
+  for (let i = 0; i < left; i++) box(p.x - w / 2 - 0.45, p.y - (left - 1) * 0.48 + i * 0.96, 0.02, 0.9, 0.42, 0.25, C.metal, p.ref, { ex: 6 });
+  for (let i = 0; i < right; i++) box(p.x + w / 2 + 0.45, p.y - (right - 1) * 0.48 + i * 0.96, 0.02, 0.9, 0.42, 0.25, C.metal, p.ref, { ex: 6 });
+}
+
+function buildECap(p){
+  cyl(p.x, p.y, 0.5, 'z', 7.5, 4.0, C.capBulk, p.ref, { ex: 7 });
+  cyl(p.x, p.y, 8.0, 'z', 0.25, 3.9, C.metal, p.ref, { ex: 14 });
+  box(p.x - 3.6, p.y, 0.5, 0.9, 4.2, 7.6, C.grey, p.ref, { ex: 7 });   // 极性标记
+}
+
+function buildSlide(p){
+  box(p.x, p.y, 0, 8.7, 4.4, 3.0, C.plastic, p.ref, { ex: 6 });
+  box(p.x + 1.2, p.y, 3.0, 2.2, 1.8, 2.2, C.grey, p.ref, { ex: 12 });
+}
+
+function buildUSBC(p){
+  box(p.x, p.y, 0.2, 9.0, 7.5, 3.0, C.metal, p.ref, { ex: 6 });
+  box(p.x, p.y + 2.4, 0.9, 8.4, 2.6, 1.1, C.hole, p.ref, { ex: 6 });
+  for (const sx of [-1, 1]) for (const sy of [-1, 1])
+    box(p.x + sx * 3.6, p.y + sy * 3.0, 0, 0.9, 0.9, 0.5, C.metal, p.ref, { ex: 6 });
+}
+
+function buildTestPoint(p){
+  cyl(p.x, p.y, 0.05, 'z', 0.5, 1.25, C.gold, p.ref, { ex: 5 }, 16);
+  cyl(p.x, p.y, 0.3, 'z', 0.5, 0.55, C.hole, p.ref, { ex: 5 }, 12);
+}
+
+function holeRing(x, y, r, ref){
+  cyl(x, y, 0.0, 'z', 0.08, r, C.hole, ref, { ex: 0 }, 20);
+  for (let i = 0; i < 14; i++){
+    const a = i / 14 * Math.PI * 2;
+    box(x + (r + 1.1) * Math.cos(a), y + (r + 1.1) * Math.sin(a), 0.0, 0.5, 0.5, 0.06, C.silk, ref, { ex: 0 });
+  }
+}
+
+function buildHoles(){
+  [[4, 4], [BOARD.w - 4, 4], [4, BOARD.h - 4], [BOARD.w - 4, BOARD.h - 4]]
+    .forEach(([x, y]) => holeRing(x, y, 1.6, 'H1–H4'));
+}
+
+function buildPanelHoles(){
+  const x0 = PANEL.x + 2, x1 = PANEL.x + PANEL.w - 2;
+  const y0 = PANEL.y + 2, y1 = PANEL.y + PANEL.h - 2;
+  [[x0, y0], [x1, y0], [x0, y1], [x1, y1]].forEach(([x, y]) => holeRing(x, y, 1.25, 'H5–H8'));
+}
+
+/* 板面尺寸刻度（丝印） */
+function buildRuler(){
+  for (let t = 5; t < BOARD.w; t += 5){
+    const major = t % 10 === 0;
+    box(t, 1.1, 0, 0.35, major ? 2.2 : 1.2, 0.06, C.silk, null, { ex: 0 });
+    box(t, BOARD.h - 1.1, 0, 0.35, major ? 2.2 : 1.2, 0.06, C.silk, null, { ex: 0 });
+  }
+  for (let t = 5; t < BOARD.h; t += 5){
+    const major = t % 10 === 0;
+    box(1.1, t, 0, major ? 2.2 : 1.2, 0.35, 0.06, C.silk, null, { ex: 0 });
+    box(BOARD.w - 1.1, t, 0, major ? 2.2 : 1.2, 0.35, 0.06, C.silk, null, { ex: 0 });
+  }
+  /* 灯阵板四边的尺寸刻度 */
+  for (let t = 5; t < PANEL.w; t += 5){
+    const major = t % 10 === 0;
+    box(PANEL.x + t, PANEL.y + 1.1, 0, 0.35, major ? 2.2 : 1.2, 0.06, C.silk, null, { ex: 0 });
+    box(PANEL.x + t, PANEL.y + PANEL.h - 1.1, 0, 0.35, major ? 2.2 : 1.2, 0.06, C.silk, null, { ex: 0 });
+  }
+}
+
+function buildScene(){
+  /* 主板：顶面绿油、侧面深绿 */
+  box(BOARD.w / 2, BOARD.h / 2, -BOARD.t, BOARD.w, BOARD.h, BOARD.t, C.mask, null, {
+    ex: 0, faceColors: { top: C.mask, bottom: C.maskEdge, side: C.maskEdge }
+  });
+  /* 底层铺铜 */
+  box(BOARD.w / 2, BOARD.h / 2, -BOARD.t - 0.15, BOARD.w - 1.2, BOARD.h - 1.2, 0.10, C.copper, null, { ex: 0 });
+  /* 灯阵 5 V / GND 宽铜干线（底层，从电源区沿右边缘到灯阵接口） */
+  [[BOARD.w - 2.5, 29, 3.0, 40], [BOARD.w - 6.5, 29, 3.0, 40]].forEach(([x, y, w, d]) =>
+    box(x, y, -BOARD.t - 0.30, w, d, 0.10, [0xe8,0xb0,0x60], null, { ex: 0 }));
+
+  PARTS.forEach(p => {
+    switch (p.kind){
+      case 'ledarray': buildLEDArray(p); break;
+      case 'bluepill': buildBluePill(p); break;
+      case 'btmodule': buildBT(p); break;
+      case 'button':   buildButton(p); break;
+      case 'jack':     buildJack(p); break;
+      case 'sop8':     buildSOP8(p); break;
+      case 'sot23':    buildSOT(p, false); break;
+      case 'sot235':   buildSOT(p, true); break;
+      case 'smd0603':  smd(p.x, p.y, 1.6, 0.8, 0.55, p.rr || C.res, p.ref, {}, 5); break;
+      case 'smd0805':  smd(p.x, p.y, 2.0, 1.25, 0.7, p.rr || C.capTan, p.ref, {}, 5); break;
+      case 'multi':    p.subs.forEach(s => smd(s.x, s.y, p.subW || 3.2, p.subD || 1.6, p.subH || 1.0, p.rr || C.capTan, p.ref, {}, 5)); break;
+      case 'ecap':     buildECap(p); break;
+      case 'slide':    buildSlide(p); break;
+      case 'usbc':     buildUSBC(p); break;
+      case 'fuse':     box(p.x, p.y, 0.1, 4.5, 3.2, 1.4, C.grey, p.ref, { ex: 5 }); break;
+      case 'sma':      box(p.x, p.y, 0.1, 4.3, 2.6, 2.2, C.chip, p.ref, { ex: 5 });
+                       box(p.x, p.y - 0.6, 0.1, 4.3, 0.9, 2.3, C.metal, p.ref, { ex: 5 }); break;
+      case 'ledsmd':   smd(p.x, p.y, 2.0, 1.25, 0.7, p.rr || C.red, p.ref, { emissive:true }, 5); break;
+      case 'testpoint':buildTestPoint(p); break;
+      case 'header1x2':header(p.x, p.y, 2, 'x', p.ref, { ex: 4 }); break;
+      case 'header1x2h':header(p.x, p.y, 2, 'x', p.ref, { ex: 4 }); break;
+      case 'header1x2v':header(p.x, p.y, 2, 'y', p.ref, { ex: 4 }); break;
+      case 'header1x3':header(p.x, p.y, 3, 'x', p.ref, { ex: 4 }); break;
+      case 'header1x4':header(p.x, p.y, 4, 'x', p.ref, { ex: 4 }); break;
+      case 'header1x4v':header(p.x, p.y, 4, 'y', p.ref, { ex: 4 }); break;
+      case 'holes':    buildHoles(); break;
+      case 'panelpcb': buildPanel(p); break;
+      case 'holepanel':buildPanelHoles(); break;
+      case 'xh3':      buildXH3(p); break;
+      case 'cable':    buildCable(p); break;
+    }
+  });
+  buildRuler();
+
+  /* 计算每个元件的标注锚点（网格包围盒顶部中心） */
+  const acc = new Map();
+  MESHES.forEach(m => {
+    if (!m.ref) return;
+    let a = acc.get(m.ref);
+    if (!a) a = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity, z1: -Infinity, n: 0 };
+    const v = m.v;
+    for (let i = 0; i < v.length; i += 3){
+      a.x0 = Math.min(a.x0, v[i]); a.x1 = Math.max(a.x1, v[i]);
+      a.y0 = Math.min(a.y0, v[i + 1]); a.y1 = Math.max(a.y1, v[i + 1]);
+      a.z1 = Math.max(a.z1, v[i + 2]);
+    }
+    a.n++;
+    acc.set(m.ref, a);
+  });
+  acc.forEach((a, ref) => {
+    const p = PART_BY_REF.get(ref);
+    if (p) p.anchor = [(a.x0 + a.x1) / 2, (a.y0 + a.y1) / 2, a.z1];
+  });
+}
+/*__PART_RENDER__*/
+/* =======================================================================
+   3. 渲染：自写软件 3D 渲染器（Z-Buffer 光栅化），无外部依赖
+   ======================================================================= */
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const off = document.createElement('canvas');
+const octx = off.getContext('2d', { willReadFrequently: true });
+
+let VW = 0, VH = 0, RW = 0, RH = 0, Kp = 1, fpx = 1;
+let img = null, data = null, bgData = null, zBuf = null, idBuf = null;
+
+const cam = { az: -2.10, pitch: 0.50, dist: 232, tx: 0, ty: 0, tz: 4, fov: 32 * Math.PI / 180 };
+const camT = Object.assign({}, cam);
+let basis = { xa:[1,0,0], ya:[0,1,0], za:[0,0,1], eye:[0,0,0] };
+
+const cross = (a, b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+const norm = v => { const l = Math.hypot(v[0],v[1],v[2]) || 1; return [v[0]/l, v[1]/l, v[2]/l]; };
+const dot = (a, b) => a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+
+const L1 = norm([-0.44, -0.58, 0.72]);
+const L2 = norm([0.66, 0.40, 0.30]);
+
+/* ---------- 尺寸与缓冲 ---------- */
+function resize(){
+  const r = cv.parentElement.getBoundingClientRect();
+  const touchy = (typeof navigator !== 'undefined') && (navigator.maxTouchPoints || 0) > 0;
+  const dpr = Math.min(window.devicePixelRatio || 1, touchy ? 1.3 : 1.6);
+  VW = Math.max(320, Math.round(r.width * dpr));
+  VH = Math.max(260, Math.round(r.height * dpr));
+  cv.width = VW; cv.height = VH;
+  Kp = VW / Math.max(1, r.width);
+
+  const maxPix = touchy ? 0.85e6 : 2.0e6;   // 手机上降低渲染分辨率，保证流畅
+  const scale = Math.min(1, Math.sqrt(maxPix / (VW * VH)));
+  RW = Math.max(240, Math.round(VW * scale));
+  RH = Math.max(200, Math.round(VH * scale));
+  off.width = RW; off.height = RH;
+
+  img = octx.createImageData(RW, RH);
+  data = img.data;
+  zBuf = new Float32Array(RW * RH);
+  idBuf = new Int32Array(RW * RH);
+
+  /* 背景：中心微亮的深色渐变（先烧进像素，避免逐帧重绘渐变） */
+  bgData = new Uint8ClampedArray(data.length);
+  const tmp = document.createElement('canvas'); tmp.width = RW; tmp.height = RH;
+  const tctx = tmp.getContext('2d');
+  const g = tctx.createLinearGradient(0, 0, RW * 0.5, RH);
+  g.addColorStop(0, '#1a2331');
+  g.addColorStop(0.55, '#111823');
+  g.addColorStop(1, '#0a0e14');
+  tctx.fillStyle = g; tctx.fillRect(0, 0, RW, RH);
+  const rd = tctx.getImageData(0, 0, RW, RH).data;
+  for (let i = 0; i < RW * RH; i++){
+    const x = i % RW, y = (i / RW) | 0;
+    const d = Math.hypot((x - RW * 0.46) / RW, (y - RH * 0.5) / RH);
+    const glow = Math.max(0, 1 - d * 2.1) * 16;
+    bgData[i*4]   = Math.min(255, rd[i*4]   + glow);
+    bgData[i*4+1] = Math.min(255, rd[i*4+1] + glow * 1.05);
+    bgData[i*4+2] = Math.min(255, rd[i*4+2] + glow * 1.2);
+    bgData[i*4+3] = 255;
+  }
+}
+
+/* ---------- 相机 ---------- */
+function updateBasis(){
+  const p = cam.pitch, a = cam.az;
+  const za = norm([Math.sin(p)*Math.cos(a), Math.sin(p)*Math.sin(a), Math.cos(p)]);
+  const eye = [cam.tx + cam.dist*za[0], cam.ty + cam.dist*za[1], cam.tz + cam.dist*za[2]];
+  let xa = cross([0,0,1], za);
+  if (Math.hypot(xa[0],xa[1],xa[2]) < 1e-5) xa = [1,0,0]; else xa = norm(xa);
+  const ya = cross(za, xa);
+  basis = { xa, ya, za, eye };
+  fpx = (RH / 2) / Math.tan(cam.fov / 2);
+}
+
+/* 世界坐标 → 屏幕（主画布像素） */
+function project(p){
+  const d = [p[0]-basis.eye[0], p[1]-basis.eye[1], p[2]-basis.eye[2]];
+  const depth = -(d[0]*basis.za[0] + d[1]*basis.za[1] + d[2]*basis.za[2]);
+  if (depth <= 0.6) return null;
+  const xc = d[0]*basis.xa[0] + d[1]*basis.xa[1] + d[2]*basis.xa[2];
+  const yc = d[0]*basis.ya[0] + d[1]*basis.ya[1] + d[2]*basis.ya[2];
+  const k = VW / RW;
+  return { x: (RW/2 + fpx*xc/depth) * k, y: (RH/2 - fpx*yc/depth) * k, d: depth };
+}
+
+/* ---------- 面法线与重心 ---------- */
+function computeNormals(){
+  MESHES.forEach(m => {
+    const nf = m.f.length;
+    m.n = new Float32Array(nf * 3);
+    m.c = new Float32Array(nf * 3);
+    for (let fi = 0; fi < nf; fi++){
+      const f = m.f[fi], v = m.v;
+      const a = f[0]*3, b = f[1]*3, c = f[2]*3;
+      const e1 = [v[b]-v[a], v[b+1]-v[a+1], v[b+2]-v[a+2]];
+      const e2 = [v[c]-v[a], v[c+1]-v[a+1], v[c+2]-v[a+2]];
+      const n = norm(cross(e1, e2));
+      m.n[fi*3] = n[0]; m.n[fi*3+1] = n[1]; m.n[fi*3+2] = n[2];
+      let cx = 0, cy = 0, cz = 0;
+      for (const id of f){ cx += v[id*3]; cy += v[id*3+1]; cz += v[id*3+2]; }
+      const k = f.length;
+      m.c[fi*3] = cx/k; m.c[fi*3+1] = cy/k; m.c[fi*3+2] = cz/k;
+    }
+  });
+}
+
+/* ---------- 光栅化 ---------- */
+let CUR_PI = -1, CUR_R = 0, CUR_G = 0, CUR_B = 0;
+
+function rasterTri(x0,y0,iz0, x1,y1,iz1, x2,y2,iz2){
+  const minx = Math.max(0, Math.floor(Math.min(x0,x1,x2)));
+  const maxx = Math.min(RW-1, Math.ceil(Math.max(x0,x1,x2)));
+  const miny = Math.max(0, Math.floor(Math.min(y0,y1,y2)));
+  const maxy = Math.min(RH-1, Math.ceil(Math.max(y0,y1,y2)));
+  if (minx > maxx || miny > maxy) return;
+  const area = (x1-x0)*(y2-y0) - (x2-x0)*(y1-y0);
+  if (Math.abs(area) < 1e-9) return;
+  const ia = 1 / area;
+  const r = CUR_R, g = CUR_G, b = CUR_B, pi = CUR_PI;
+  for (let y = miny; y <= maxy; y++){
+    const py = y + 0.5;
+    const row = y * RW;
+    for (let x = minx; x <= maxx; x++){
+      const px = x + 0.5;
+      const w0 = ((x1-x0)*(py-y0) - (px-x0)*(y1-y0)) * ia;
+      if (w0 < 0) continue;
+      const w1 = ((x2-x1)*(py-y1) - (px-x1)*(y2-y1)) * ia;
+      if (w1 < 0) continue;
+      const w2 = 1 - w0 - w1;
+      if (w2 < 0) continue;
+      /* 重心坐标：w0 对应顶点 C，w1 对应顶点 A，w2 对应顶点 B */
+      const iz = w1*iz0 + w2*iz1 + w0*iz2;
+      const idx = row + x;
+      if (iz > zBuf[idx]){
+        zBuf[idx] = iz;
+        idBuf[idx] = pi;
+        const o = idx * 4;
+        data[o] = r; data[o+1] = g; data[o+2] = b; data[o+3] = 255;
+      }
+    }
+  }
+}
+
+/* ---------- 每帧绘制 ---------- */
+let vbuf = null;
+
+function draw3D(explodeK, hoverPi, selPi){
+  data.set(bgData);
+  zBuf.fill(-1);
+  if (hoverPi >= 0 || selPi >= 0) idBuf.fill(-1); else idBuf.fill(-1);
+
+  const eye = basis.eye;
+  const cx0 = RW/2, cy0 = RH/2;
+
+  for (let mi = 0; mi < MESHES.length; mi++){
+    const m = MESHES[mi];
+    if (!showPanel && m.ref && PANEL_REFS.has(m.ref)) continue;
+    const v = m.v, nv = v.length / 3;
+    if (!vbuf || vbuf.length < nv * 4) vbuf = new Float32Array(nv * 8);
+    const dz = m.ex * explodeK;
+    for (let i = 0; i < nv; i++){
+      const d = [v[i*3]-eye[0], v[i*3+1]-eye[1], v[i*3+2]+dz-eye[2]];
+      const depth = -(d[0]*basis.za[0] + d[1]*basis.za[1] + d[2]*basis.za[2]);
+      const xc = d[0]*basis.xa[0] + d[1]*basis.xa[1] + d[2]*basis.xa[2];
+      const yc = d[0]*basis.ya[0] + d[1]*basis.ya[1] + d[2]*basis.ya[2];
+      const o = i*4;
+      if (depth <= 0.6){ vbuf[o+3] = -1; continue; }
+      vbuf[o]   = cx0 + fpx*xc/depth;
+      vbuf[o+1] = cy0 - fpx*yc/depth;
+      vbuf[o+2] = 1/depth;
+      vbuf[o+3] = depth;
+    }
+    const base = m.color;
+    const isSel = (m.pi >= 0 && m.pi === selPi);
+    const isHov = (m.pi >= 0 && m.pi === hoverPi);
+    for (let fi = 0; fi < m.f.length; fi++){
+      const f = m.f[fi];
+      let ok = true;
+      for (let k = 0; k < f.length; k++) if (vbuf[f[k]*4+3] < 0) { ok = false; break; }
+      if (!ok) continue;
+      let nx = m.n[fi*3], ny = m.n[fi*3+1], nz = m.n[fi*3+2];
+      const cxw = m.c[fi*3], cyw = m.c[fi*3+1], czw = m.c[fi*3+2] + dz;
+      if ((eye[0]-cxw)*nx + (eye[1]-cyw)*ny + (eye[2]-czw)*nz < 0) continue;   /* 背面剔除 */
+      let r, g, b;
+      if (m.emissive){
+        r = base[0]; g = base[1]; b = base[2];
+        r *= 0.88; g *= 0.88; b *= 0.88;
+      } else {
+        const d1 = Math.max(0, nx*L1[0] + ny*L1[1] + nz*L1[2]);
+        const d2 = Math.max(0, nx*L2[0] + ny*L2[1] + nz*L2[2]);
+        const bounce = Math.max(0, -nz) * 0.14;
+        const kk = 0.32 + 0.62*d1 + 0.20*d2 + bounce;
+        const fc = m.fc ? (fi === 0 ? m.fc.top : (fi === 1 ? m.fc.bottom : m.fc.side)) : null;
+        const cc = fc || base;
+        r = cc[0]*kk; g = cc[1]*kk; b = cc[2]*kk;
+      }
+      if (isSel){ r = r*0.76 + 120*0.24; g = g*0.76 + 226*0.24; b = b*0.76 + 255*0.24; }
+      else if (isHov){ r = r*0.88 + 90*0.12; g = g*0.88 + 210*0.12; b = b*0.88 + 230*0.12; }
+      CUR_PI = m.pi === undefined ? -1 : m.pi;
+      CUR_R = Math.min(255, r) | 0; CUR_G = Math.min(255, g) | 0; CUR_B = Math.min(255, b) | 0;
+      if (f.length === 4){
+        const a = f[0]*4, bb = f[1]*4, c = f[2]*4, d = f[3]*4;
+        rasterTri(vbuf[a],vbuf[a+1],vbuf[a+2], vbuf[bb],vbuf[bb+1],vbuf[bb+2], vbuf[c],vbuf[c+1],vbuf[c+2]);
+        rasterTri(vbuf[a],vbuf[a+1],vbuf[a+2], vbuf[c],vbuf[c+1],vbuf[c+2], vbuf[d],vbuf[d+1],vbuf[d+2]);
+      } else {
+        const a = f[0]*4, bb = f[1]*4, c = f[2]*4;
+        rasterTri(vbuf[a],vbuf[a+1],vbuf[a+2], vbuf[bb],vbuf[bb+1],vbuf[bb+2], vbuf[c],vbuf[c+1],vbuf[c+2]);
+      }
+    }
+  }
+}
+/*__PART_UI__*/
+/* =======================================================================
+   4. 交互、标注与灯效
+   ======================================================================= */
+buildScene();
+/* ---------------- 每个器件在题目 / 讲座里的出处 ---------------- */
+const SRC = {
+  'LED1–LED64': '讲座 P7·P10–P12·P29–P30（WS2812B 灯珠）',
+  'M1': '题目 三-6（允许自制灯阵）',
+  'J7': '工艺（灯阵板接口）',
+  'C10–C11': '讲座 P12（灯阵供电储能）',
+  'J5': '本设计补充（板间接口）',
+  'U4': '本设计补充（WS2812B 5 V 电平缓冲，提高驱动可靠性）',
+  'C7': '常规工艺（缓冲器电源去耦）',
+  'R7': '本设计补充（数据线阻尼）',
+  'TP3': '题目 三-2（留必要测试端口）',
+  'C8–C9': '讲座 P12（灯阵供电储能）',
+  'U1': '讲座 P12·P20–P24（STM32F103C8T6 最小系统板）',
+  'U3': '讲座 P31（BT36 / BT24 蓝牙串口模块）',
+  'J8': '工艺（模块插座）',
+  'SW1': '讲座 P26–P27（按键）',
+  'SW2': '讲座 P26–P27（按键）',
+  'SW3': '讲座 P26–P27（按键）',
+  'SW4': '讲座 P26–P27（按键）',
+  'C12–C15': '讲座 P27（按键硬件滤波电容）',
+  'J1': '讲座 P13–P15（3.5 mm 插座）',
+  'U2': '讲座 P18（有源方案：运算放大器）',
+  'C1': '讲座 P16–P18（偏置电路）',
+  'C2': '讲座 P16–P18（偏置电路）',
+  'R1': '讲座 P16–P18（偏置电路）',
+  'R2': '讲座 P16–P18（偏置电路）',
+  'C5': '常规工艺（运放电源去耦）',
+  'C6': '常规工艺（运放电源去耦）',
+  'R4': '讲座 P16–P18（偏置电路）',
+  'R5': '讲座 P16–P18（偏置电路）',
+  'R3': '讲座 P16–P18（RC 抗混叠）',
+  'C3': '讲座 P16–P18（RC 抗混叠）',
+  'D2': '本设计补充（ADC 钳位保护）',
+  'J2': '题目 二-2.2（预留 ADC 输入测试端口）',
+  'SW5': '本设计补充（电源总开关）',
+  'F1': '本设计补充（过流保护）',
+  'D1': '本设计补充（防反接，顺带把灯阵供电降到约 4.6 V）',
+  'R6': '本设计补充（电源指示）',
+  'LED1P': '本设计补充（电源指示）',
+  'J3': '讲座 P9·P12（建议使用学生电源）',
+  'P1': '题目 三-5（提到充电宝供电）',
+  'R8–R9': '工艺（Type-C CC 下拉）',
+  'C4': '讲座 P12（灯阵供电，数据手册建议大电容）',
+  'J4': '讲座 P9（ST-Link 调试）',
+  'JP1': '本设计补充（BOOT0 选择）',
+  'TP1': '题目 三-2（留必要测试端口）',
+  'TP2': '题目 三-2（留必要测试端口）',
+  'J6': '本设计补充（预留扩展 IO）',
+  'W1': '工艺（板间 3 芯排线）',
+  'H1–H4': '工艺（安装孔）',
+  'H5–H8': '工艺（安装孔）'
+};
+const srcOf = p => SRC[p.ref] || '本设计补充';
+const PART_PI = new Map();
+PARTS.forEach((p, i) => PART_PI.set(p.ref, i));
+MESHES.forEach(m => { m.pi = m.ref ? PART_PI.get(m.ref) : -1; if (m.pi === undefined) m.pi = -1; });
+computeNormals();
+
+const KIND_DOT = {
+  ledarray:'#ff4fd8', bluepill:'#4fa3ff', btmodule:'#5ee6a8', button:'#ffcc57',
+  jack:'#8f7bff', sop8:'#8f7bff', sot23:'#8f7bff', sot235:'#41dcff',
+  smd0603:'#c9b189', smd0805:'#c9b189', multi:'#c9b189', ecap:'#ff7a59',
+  usbc:'#ff7a59', fuse:'#ff7a59', sma:'#ff7a59', slide:'#ff7a59', ledsmd:'#ff7a59',
+  testpoint:'#57e0e0', holes:'#9fb0c6'
+};
+['header1x2','header1x2h','header1x2v','header1x3','header1x4','header1x4v'].forEach(k => KIND_DOT[k] = '#57e0e0');
+
+const shortName = {
+  'LED1–LED64':'灯阵 8×8', 'U1':'主控 STM32F103', 'U3':'蓝牙模块', 'U4':'电平缓冲',
+  'U2':'运放 MCP6002', 'J1':'3.5mm 输入', 'J2':'ADC 测试口', 'J4':'SWD 调试口',
+  'J3':'5V 备用输入', 'J5':'灯阵供电注入', 'J6':'扩展 IO', 'P1':'Type-C 5V', 'SW5':'电源开关',
+  'C4':'470µF 储能', 'F1':'自恢复保险', 'D1':'反接保护', 'D2':'ADC 钳位',
+  'H1–H4':'M3 安装孔', 'TP1':'5V 测试点', 'TP2':'GND 测试点', 'JP1':'BOOT0 跳线'
+};
+const labelOf = p => shortName[p.ref] ? (p.ref + '  ' + shortName[p.ref]) : p.ref;
+const posOf = p => (p.kind === 'holes') ? '四角 (4,4) (96,4) (4,76) (96,76)'
+  : ('X ' + p.x.toFixed(1) + ' , Y ' + (BOARD.h - p.y).toFixed(1));
+
+/* ---------- 侧栏清单 ---------- */
+const bomEl = document.getElementById('bom');
+PARTS.forEach(p => {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.dataset.ref = p.ref;
+  row.innerHTML = '<span class="dot" style="background:' + (KIND_DOT[p.kind] || '#9fb0c6') + '"></span>'
+    + '<span class="txt"><span class="r1">' + p.ref + ' · ' + p.name + '</span>'
+    + '<span class="r2">' + (p.model || p.spec) + ' · 位置 ' + posOf(p) + '</span></span>'
+    + '<span class="qty">×' + p.qty + '</span>';
+  row.onclick = () => select(p.ref, true);
+  bomEl.appendChild(row);
+});
+
+const detailEl = document.getElementById('detail');
+let selRef = 'LED1–LED64', hovPi = -1;
+
+function select(ref, focus){
+  selRef = ref;
+  const p = PART_BY_REF.get(ref);
+  document.querySelectorAll('.row').forEach(r => r.classList.toggle('on', r.dataset.ref === ref));
+  if (!p){ detailEl.innerHTML = '<h3>未选中</h3><p>点击 3D 模型中的元件或左侧清单查看详情。</p>'; return; }
+  const zone = ZONES.find(z => z.id === p.zone);
+  detailEl.innerHTML =
+    '<h3>' + p.ref + ' · ' + p.name + '</h3>'
+    + '<div class="sub">' + p.spec + '</div>'
+    + '<dl class="kv">'
+    + (p.model ? '<dt>具体型号</dt><dd>' + p.model + '</dd>' : '')
+    + '<dt>器件出处</dt><dd>' + srcOf(p) + '</dd>'
+    + '<dt>板面位置</dt><dd>' + posOf(p) + ' mm</dd>'
+    + '<dt>所属分区</dt><dd>' + (zone ? (zone.id + ' ' + zone.name) : '机械 / 安装') + '</dd>'
+    + '<dt>数量</dt><dd>' + p.qty + '</dd>'
+    + '</dl><p>' + p.info + '</p>';
+  const row = document.querySelector('.row[data-ref="' + ref.replace(/"/g,'') + '"]');
+  if (row) row.scrollIntoView({ block:'nearest', behavior:'smooth' });
+}
+select('LED1–LED64');
+
+/* ---------- 相机控制 ---------- */
+const VIEWS = {
+  iso:    { az: -2.10, pitch: 0.50, dist: 232 },
+  top:    { az: -Math.PI/2, pitch: 0.012, dist: 198 },
+  bottom: { az: -Math.PI/2, pitch: Math.PI - 0.02, dist: 198 },
+  side:   { az: Math.PI, pitch: 0.10, dist: 235 }
+};
+let animating = false, spin = false;
+/* 需要单独显示的“灯阵模块”相关位号（可整体隐藏） */
+const PANEL_REFS = new Set(['M1', 'LED1–LED64', 'J7', 'C10–C11', 'H5–H8', 'W1']);
+let showPanel = true;
+const isPanelPart = ref => PANEL_REFS.has(ref);
+
+/* 场景包围盒 + 自动取景：始终把主板（和灯阵板）完整框进画面 */
+let SCENE_BOX = null;
+function computeSceneBox(){
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, z0 = 1e9, z1 = -1e9;
+  MESHES.forEach(m => {
+    if (!showPanel && m.ref && PANEL_REFS.has(m.ref)) return;
+    const v = m.v;
+    for (let i = 0; i < v.length; i += 3){
+      if (v[i] < x0) x0 = v[i]; if (v[i] > x1) x1 = v[i];
+      if (v[i+1] < y0) y0 = v[i+1]; if (v[i+1] > y1) y1 = v[i+1];
+      if (v[i+2] < z0) z0 = v[i+2]; if (v[i+2] > z1) z1 = v[i+2];
+    }
+  });
+  SCENE_BOX = { x0, x1, y0, y1, z0, z1 };
+}
+function fitCamera(){
+  computeSceneBox();
+  cam.tx = camT.tx = (SCENE_BOX.x0 + SCENE_BOX.x1) / 2;
+  cam.ty = camT.ty = (SCENE_BOX.y0 + SCENE_BOX.y1) / 2;
+  cam.tz = camT.tz = (SCENE_BOX.z0 + SCENE_BOX.z1) / 2 + 2;
+  cam.dist = camT.dist = 300;
+  updateBasis();
+  const B = SCENE_BOX, pts = [];
+  for (const X of [B.x0, B.x1]) for (const Y of [B.y0, B.y1]) for (const Z of [B.z0 - 6, B.z1 + 6]) pts.push([X, Y, Z]);
+  let m = 0;
+  pts.forEach(p => {
+    const s = project(p);
+    if (!s) return;
+    m = Math.max(m, Math.abs(s.x - VW / 2) / (VW / 2), Math.abs(s.y - VH / 2) / (VH / 2));
+  });
+  cam.dist = camT.dist = Math.max(70, Math.min(900, 300 * m * 1.14));
+}
+function setView(name){
+  const v = VIEWS[name] || VIEWS.iso;
+  camT.az = v.az; camT.pitch = v.pitch;
+  /* 选最近的等价方位角，避免绕远 */
+  while (camT.az - cam.az > Math.PI) camT.az -= Math.PI*2;
+  while (camT.az - cam.az < -Math.PI) camT.az += Math.PI*2;
+  cam.az = camT.az; cam.pitch = camT.pitch;
+  fitCamera();
+  animating = true;
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === name));
+}
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+document.getElementById('btnReset').onclick = () => setView('iso');
+const spinChk = document.getElementById('spin');
+document.getElementById('btnSpin').onclick = () => { spinChk.checked = !spinChk.checked; spin = spinChk.checked; spinChk.dispatchEvent(new Event('change')); };
+spinChk.onchange = () => { spin = spinChk.checked; };
+
+/* ---------- 显示开关 ---------- */
+const tLabels = document.getElementById('tLabels'), tZones = document.getElementById('tZones');
+const tRuler = document.getElementById('tRuler'), tSilk = document.getElementById('tSilk');
+const tExplode = document.getElementById('tExplode');
+const tPanel = document.getElementById('tPanel');
+tPanel.onchange = () => { showPanel = tPanel.checked; fitCamera(); };
+let explodeK = 0;
+
+/* ---------- 灯阵 ---------- */
+const patSel = document.getElementById('pattern');
+let ledMode = patSel.value;
+patSel.onchange = () => { ledMode = patSel.value; ledT0 = performance.now(); };
+let ledT0 = performance.now();
+
+function hsv(h, s, v){
+  const i = Math.floor(h*6), f = h*6-i, p = v*(1-s), q = v*(1-f*s), t = v*(1-(1-f)*s);
+  const r = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,p,v],[v,p,q]][i%6];
+  return [r[0]*255, r[1]*255, r[2]*255];
+}
+
+function ledColor(kind, t, i, j){
+  const b = i => BITS[i];
+  switch (kind){
+    case 'red':   return [255,28,28];
+    case 'green': return [0,230,96];
+    case 'blue':  return [46,96,255];
+    case 'off':   return OFF_LED;
+    case 'heart': { const on = b('heart')[j][i] === '1';
+      const br = 0.34 + 0.66 * (0.5 + 0.5*Math.sin(t*2.2));
+      return on ? [255*br, 34*br, 210*br] : OFF_LED; }
+    case 'smile': return b('smile')[j][i] === '1' ? [255,205,0] : OFF_LED;
+    case 'arrow': { const sh = Math.floor(t*3.2) % 11 - 2, c = i - sh;
+      return (c >= 0 && c < 8 && b('arrow')[j][c] === '1') ? [0,225,255] : OFF_LED; }
+    case 'fft': { const h = [3,4,6,8,7,5,3,2][i];
+      return ((7-j) < h) ? hsv(i/8*0.78, 0.75, 1) : OFF_LED; }
+    case 'waterfall': {
+      const tau = t - j * 0.24;                      // 每行是稍早一帧的频谱，形成瀑布
+      const amp = [3,4,6,8,7,5,3,2][i] / 8;
+      const v = amp * (0.55 + 0.45 * Math.sin(tau * 3.1 + i * 0.8));
+      return v > 0.26 ? hsv(i / 8 * 0.78, 0.85, Math.min(1, v * 1.7)) : OFF_LED;
+    }
+    case 'demo': {
+      const T = t % 18;
+      if (T < 1) return [255,28,28];
+      if (T < 2) return [0,230,96];
+      if (T < 3) return [46,96,255];
+      if (T < 8) return ledColor('heart', T-3, i, j);
+      if (T < 13) return ledColor('arrow', T-8, i, j);
+      if (T < 16){ const h = Math.max(1, Math.round(([3,4,6,8,7,5,3,2][i]) * (0.6 + 0.55*Math.sin(t*3 + i))));
+        return ((7-j) < h) ? hsv(i/8*0.78, 0.75, 1) : OFF_LED; }
+      return ledColor('smile', 0, i, j);
+    }
+  }
+  return OFF_LED;
+}
+
+function paintLEDs(now){
+  const t = (now - ledT0) / 1000;
+  for (let k = 0; k < ledWindows.length; k++){
+    const w = ledWindows[k], c = ledColor(ledMode, t, w.i, w.j);
+    const col = w.mesh.color;
+    if (col[0] !== c[0] || col[1] !== c[1] || col[2] !== c[2]){
+      col[0] = c[0]; col[1] = c[1]; col[2] = c[2];
+    }
+  }
+}
+
+/* ---------- 2D 叠加层 ---------- */
+function rr(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+/* 在板面上按板面方向绘制文字 */
+function planeText(lx, ly, str, sizeMM, color, align){
+  const p0 = project(W3(lx, ly, 0.12));
+  const p1 = project(W3(lx + 5, ly, 0.12));
+  const p2 = project(W3(lx, ly + 5, 0.12));
+  if (!p0 || !p1 || !p2) return;
+  const ang = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+  const scale = Math.hypot(p1.x - p0.x, p1.y - p0.y) / 5;
+  ctx.save();
+  ctx.translate(p0.x, p0.y);
+  ctx.rotate(ang);
+  ctx.font = '600 ' + Math.max(7, sizeMM * scale).toFixed(1) + 'px "Microsoft YaHei",system-ui,sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = align || 'left';
+  ctx.fillStyle = color;
+  ctx.fillText(str, 0, 0);
+  ctx.restore();
+}
+
+function drawOverlay(){
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  octx.putImageData(img, 0, 0);
+  ctx.drawImage(off, 0, 0, RW, RH, 0, 0, VW, VH);
+  const above = basis.za[2] > 0.10;
+  const below = basis.za[2] < -0.10;
+  const small = Math.max(10, 11 * Kp), tiny = Math.max(9, 10 * Kp);
+
+  /* --- 功能分区 --- */
+  if (tZones.checked && above){
+    ZONES.forEach(z => {
+      const pts = [[z.x0,z.y0],[z.x1,z.y0],[z.x1,z.y1],[z.x0,z.y1]]
+        .map(([x,y]) => project(W3(x, y, 0.06))).filter(Boolean);
+      if (pts.length < 4) return;
+      ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < 4; i++) ctx.lineTo(pts[i].x, pts[i].y);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(' + z.color[0] + ',' + z.color[1] + ',' + z.color[2] + ',0.085)';
+      ctx.fill();
+      ctx.setLineDash([6*Kp, 5*Kp]);
+      ctx.strokeStyle = 'rgba(' + z.color[0] + ',' + z.color[1] + ',' + z.color[2] + ',0.55)';
+      ctx.lineWidth = 1.2*Kp; ctx.stroke(); ctx.setLineDash([]);
+      const c = project(W3((z.x0+z.x1)/2, (z.y0+z.y1)/2, 0.06));
+      if (c){
+        ctx.font = '600 ' + tiny + 'px "Microsoft YaHei",system-ui,sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(' + z.color[0] + ',' + z.color[1] + ',' + z.color[2] + ',0.95)';
+        ctx.fillText(z.id + ' · ' + z.name, c.x, c.y);
+      }
+    });
+  }
+
+  /* --- 板面丝印 --- */
+  if (tSilk.checked && above){
+    planeText(4.5, 23.6, '炫彩音乐灯 · C 题', 2.6, 'rgba(242,246,250,0.92)');
+    planeText(44, 22.8, '姓名：', 2.4, 'rgba(242,246,250,0.85)');
+    planeText(51, 22.8, '_________________', 2.4, 'rgba(242,246,250,0.5)');
+    planeText(66, 22.8, '学号：', 2.4, 'rgba(242,246,250,0.85)');
+    planeText(73, 22.8, '_________________', 2.4, 'rgba(242,246,250,0.5)');
+    if (showPanel){
+      planeText(PANEL.x + 30, PANEL.y + PANEL.h - 3.2, '灯阵 8×8 · 64 × WS2812B', 2.6, 'rgba(242,246,250,0.92)');
+      planeText(PANEL.x + 5, PANEL.y + PANEL.h - 1.6, '5V  DIN  GND', 1.9, 'rgba(242,246,250,0.8)');
+    }
+  }
+  if (below){
+    const c = project(W3(BOARD.w / 2, BOARD.h / 2, -1.9));
+    if (c){
+      ctx.font = '600 ' + small + 'px "Microsoft YaHei",system-ui,sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(230,180,110,0.95)';
+      ctx.fillText('主板底层：大面积 GND 铺铜 + 灯阵 5 V / GND 宽铜干线（≥ 2 mm）', c.x, c.y - 26*Kp);
+      ctx.fillStyle = 'rgba(159,176,198,0.85)';
+      ctx.font = tiny + 'px "Microsoft YaHei",system-ui,sans-serif';
+      ctx.fillText('焊接面：排母焊点 · 阻容焊盘 · 连接器焊脚', c.x, c.y - 8*Kp);
+    }
+  }
+
+  /* --- 尺寸标尺 --- */
+  if (tRuler.checked){
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let t = 0; t <= BOARD.w; t += 10){
+      [['top', -5.2], ['bot', BOARD.h + 5.2]].forEach(([w, yy]) => {
+        const p = project(W3(t, yy, 0.05));
+        if (!p) return;
+        ctx.font = (t % 20 === 0 ? '600 ' : '') + tiny + 'px "Microsoft YaHei",system-ui,sans-serif';
+        ctx.fillStyle = t % 20 === 0 ? '#cfe6f5' : '#7f8fa5';
+        ctx.fillText(String(t), p.x, p.y);
+      });
+    }
+    for (let t = 0; t <= BOARD.h; t += 10){
+      [-5.6, BOARD.w + 5.6].forEach(xx => {
+        const p = project(W3(xx, t, 0.05));
+        if (!p) return;
+        ctx.font = (t % 20 === 0 ? '600 ' : '') + tiny + 'px "Microsoft YaHei",system-ui,sans-serif';
+        ctx.fillStyle = t % 20 === 0 ? '#cfe6f5' : '#7f8fa5';
+        ctx.fillText(String(t), p.x, p.y);
+      });
+    }
+    const dx = project(W3(BOARD.w / 2, BOARD.h + 12, 0.05));
+    if (dx){ ctx.font = '600 ' + small + 'px "Microsoft YaHei",system-ui,sans-serif';
+      ctx.fillStyle = '#41dcff'; ctx.fillText('主板宽 ' + BOARD.w + ' mm', dx.x, dx.y); }
+    const dy = project(W3(BOARD.w + 13, BOARD.h / 2, 0.05));
+    if (dy){ ctx.font = '600 ' + small + 'px "Microsoft YaHei",system-ui,sans-serif';
+      ctx.fillStyle = '#41dcff'; ctx.fillText('主板高 ' + BOARD.h + ' mm', dy.x, dy.y); }
+  }
+
+  /* --- 元件标注 --- */
+  if (tLabels.checked && (above || below)){
+    const placed = [];
+    const items = [];
+    PARTS.forEach(p => {
+      if (!p.anchor) return;
+      if (!showPanel && isPanelPart(p.ref)) return;
+      const s = project(p.anchor);
+      if (!s) return;
+      items.push({ p, s });
+    });
+    items.sort((a, b) => (b.p.pri - a.p.pri) || (b.s.d - a.s.d));
+
+    const fs = Math.max(10.5, 11.5 * Kp);
+    ctx.font = '600 ' + fs + 'px "Microsoft YaHei",system-ui,sans-serif';
+    const pad = 7 * Kp, lh = fs + 9 * Kp;
+    for (const it of items){
+      const txt = labelOf(it.p);
+      const isSel = it.p.ref === selRef, isHov = PART_PI.get(it.p.ref) === hovPi;
+      const w = ctx.measureText(txt).width + pad * 2;
+      const h = lh;
+      const dx = 15 * Kp, dy = 13 * Kp;
+      const cands = [[dx, -h - dy], [dx, dy], [0, -h - dy * 1.7], [0, h + dy * 1.2],
+                     [-w - dx, -h - dy], [-w - dx, dy], [dx * 2.2, -h / 2], [-w - dx * 2.2, -h / 2]];
+      let bx = null, by = null;
+      for (const [ox, oy] of cands){
+        const X = it.s.x + ox, Y = it.s.y + oy;
+        if (X < 6 || Y < 6 || X + w > VW - 6 || Y + h > VH - 6) continue;
+        let hit = false;
+        for (const r of placed) if (!(X > r.x + r.w + 4 || X + w < r.x - 4 || Y > r.y + r.h + 4 || Y + h < r.y - 4)){ hit = true; break; }
+        if (!hit){ bx = X; by = Y; break; }
+      }
+      if (bx === null) continue;
+      placed.push({ x: bx, y: by, w, h });
+
+      /* 引线 */
+      const tx = Math.max(bx, Math.min(it.s.x, bx + w));
+      const ty = Math.max(by, Math.min(it.s.y, by + h));
+      ctx.beginPath(); ctx.moveTo(it.s.x, it.s.y); ctx.lineTo(tx, ty);
+      ctx.strokeStyle = isSel ? 'rgba(65,220,255,0.95)' : 'rgba(150,175,200,0.42)';
+      ctx.lineWidth = (isSel ? 1.6 : 1) * Kp; ctx.stroke();
+      ctx.beginPath(); ctx.arc(it.s.x, it.s.y, (isSel ? 3.4 : 2.2) * Kp, 0, Math.PI*2);
+      ctx.fillStyle = isSel ? '#41dcff' : 'rgba(180,200,220,0.7)'; ctx.fill();
+
+      /* 标签框 */
+      rr(bx, by, w, h, 6 * Kp);
+      ctx.fillStyle = isSel ? 'rgba(14,42,54,0.97)' : (isHov ? 'rgba(24,36,50,0.95)' : 'rgba(13,18,25,0.86)');
+      ctx.fill();
+      ctx.strokeStyle = isSel ? '#41dcff' : (isHov ? '#3d7f96' : 'rgba(120,145,175,0.34)');
+      ctx.lineWidth = (isSel ? 1.6 : 1) * Kp; ctx.stroke();
+      ctx.font = '600 ' + fs + 'px "Microsoft YaHei",system-ui,sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = isSel ? '#d9f8ff' : '#e8eef7';
+      ctx.fillText(txt, bx + pad, by + h / 2);
+      if (isSel){
+        ctx.font = '600 ' + tiny + 'px "Microsoft YaHei",system-ui,sans-serif';
+        ctx.fillStyle = '#41dcff';
+        ctx.fillText('位置 ' + posOf(it.p) + ' mm', bx + pad, by + h + lh * 0.62);
+      }
+    }
+  }
+}
+
+/* ---------- 拾取 ---------- */
+function pick(cx, cy){
+  const r = cv.getBoundingClientRect();
+  const bx = Math.round((cx - r.left) / r.width * RW);
+  const by = Math.round((cy - r.top) / r.height * RH);
+  if (bx < 0 || by < 0 || bx >= RW || by >= RH) return -1;
+  return idBuf[by * RW + bx];
+}
+
+/* ---------- 交互 ---------- */
+let drag = null;
+const ptrs = new Map();
+let pinch = null;
+function ptrDist(){
+  const a = [...ptrs.values()];
+  return Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
+}
+cv.addEventListener('pointerdown', e => {
+  ptrs.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  if (cv.setPointerCapture) cv.setPointerCapture(e.pointerId);
+  cv.classList.add('drag');
+  if (ptrs.size >= 2){                       /* 双指：捏合缩放 */
+    pinch = { d0: ptrDist(), dist0: cam.dist };
+    drag = null;
+    return;
+  }
+  if (e.button === 2) drag = { mode:'pan', x:e.clientX, y:e.clientY, tx:cam.tx, ty:cam.ty, moved:0 };
+  else drag = { mode:'rot', x:e.clientX, y:e.clientY, az:cam.az, pitch:cam.pitch, moved:0 };
+});
+cv.addEventListener('pointermove', e => {
+  if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  if (pinch && ptrs.size >= 2){
+    const d = ptrDist();
+    if (d > 10 && pinch.d0 > 10){
+      cam.dist = camT.dist = Math.max(60, Math.min(900, pinch.dist0 * pinch.d0 / d));
+      animating = false;
+    }
+    return;
+  }
+  if (!drag){
+    const pi = pick(e.clientX, e.clientY);
+    if (pi !== hovPi) hovPi = pi;
+    return;
+  }
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  drag.moved = Math.max(drag.moved, Math.hypot(dx, dy));
+  animating = false;
+  if (drag.mode === 'rot'){
+    cam.az = drag.az - dx * 0.008;
+    cam.pitch = Math.max(0.02, Math.min(Math.PI - 0.02, drag.pitch + dy * 0.006));
+    camT.az = cam.az; camT.pitch = cam.pitch;
+  } else {
+    const s = cam.dist / 900;
+    cam.tx = drag.tx - dx * s * basis.xa[0] + dy * s * basis.ya[0];
+    cam.ty = drag.ty - dx * s * basis.xa[1] + dy * s * basis.ya[1];
+    camT.tx = cam.tx; camT.ty = cam.ty;
+  }
+});
+cv.addEventListener('pointerup', e => {
+  ptrs.delete(e.pointerId);
+  if (ptrs.size < 2) pinch = null;
+  const wasClick = drag && drag.moved < 5 && pinch === null;
+  drag = null; cv.classList.remove('drag');
+  if (wasClick){
+    const pi = pick(e.clientX, e.clientY);
+    if (pi >= 0){ const p = PARTS[pi]; if (p) select(p.ref, true); }
+    else select('__none__');
+  }
+});
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  camT.dist = Math.max(60, Math.min(900, camT.dist * (1 + Math.sign(e.deltaY) * 0.09)));
+  cam.dist = camT.dist;
+}, { passive:false });
+cv.addEventListener('contextmenu', e => e.preventDefault());
+cv.addEventListener('pointercancel', e => {
+  ptrs.delete(e.pointerId); pinch = null; drag = null; cv.classList.remove('drag');
+});
+
+/* 全屏 / 侧栏开关（手机上看模型更方便） */
+document.getElementById('btnFull').onclick = () => {
+  const el = cv.parentElement;
+  if (!document.fullscreenElement){
+    if (el.requestFullscreen) el.requestFullscreen();
+  } else if (document.exitFullscreen){
+    document.exitFullscreen();
+  }
+};
+document.getElementById('btnSide').onclick = () => {
+  const app = document.querySelector('.app');
+  if (app) app.classList.toggle('hide-side');
+};
+/* 静态 2D 版与 3D 版互相切换 */
+const staticEl = document.getElementById('static');
+document.getElementById('btnStatic').onclick = () => {
+  if (staticEl) staticEl.style.display = (staticEl.style.display === 'none') ? 'block' : 'none';
+};
+
+/* ---------- 主循环 ---------- */
+let last = performance.now();
+let firstFrame = true;
+function loop(now){
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+
+  if (spin){ cam.az += dt * 0.42; camT.az = cam.az; animating = false; }
+  if (animating){
+    const k = Math.min(1, dt * 6.5);
+    cam.az += (camT.az - cam.az) * k;
+    cam.pitch += (camT.pitch - cam.pitch) * k;
+    cam.dist += (camT.dist - cam.dist) * k;
+    if (Math.abs(camT.az - cam.az) < 1e-3 && Math.abs(camT.pitch - cam.pitch) < 1e-3 && Math.abs(camT.dist - cam.dist) < 0.5) animating = false;
+  }
+  const eK = tExplode.checked ? 1 : 0;
+  explodeK += (eK - explodeK) * Math.min(1, dt * 5);
+
+  paintLEDs(now);
+  updateBasis();
+  const selPi = PART_PI.get(selRef);
+  draw3D(explodeK, hovPi, selPi === undefined ? -1 : selPi);
+  drawOverlay();
+  /* 第一帧画好后收起静态 2D 版，露出可交互的 3D 模型 */
+  if (firstFrame){ firstFrame = false; if (staticEl) staticEl.style.display = 'none'; }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- 启动 ---------- */
+function boot(){
+  resize();
+  fitCamera();
+  updateBasis();
+  requestAnimationFrame(loop);
+}
+if (typeof ResizeObserver !== 'undefined'){
+  const ro = new ResizeObserver(() => resize());
+  ro.observe(cv.parentElement);
+} else {
+  window.addEventListener('resize', resize);
+}
+boot();
+document.getElementById('scalebox').innerHTML =
+  '主板 <b>' + BOARD.w + ' × ' + BOARD.h + ' mm</b> · 厚 <b>1.6 mm</b> · 灯阵板 <b>' + PANEL.w + ' × ' + PANEL.h + ' mm</b>'
+  + '<br>灯阵 <b>8 × 8</b>（64 颗）· BOM <b>' + PARTS.length + '</b> 项';
+</script>
+</body>
+</html>
