@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>炫彩音乐灯 · 主控板 3D 布局模型</title>
+<title>炫彩音乐灯 · 接线 3D</title>
 <style>
   :root{
     --bg:#0b0e13;
@@ -206,175 +206,24 @@
 </head>
 <body>
 <div class="app">
-  <aside class="side">
-    <div class="brand">
-      <span class="tagline">2026 晨电智能杯 · 低年级组 C 题</span>
-      <h1>炫彩音乐灯 · <span>主板 90×70 + 独立灯阵板</span></h1>
-      <p>主板 <b>90 × 70 mm</b>，灯阵板 <b>70 × 70 mm</b>，两块板之间只用 3 根杜邦线（V+ / IN / V）连接；主板上放全部电路，灯阵单独一块小板。<br>坐标原点取<b>主板左下角</b>，X 向右、Y 向上，单位 mm；灯阵板在右侧同一平面内一起展示。</p>
-    </div>
-
-    <section>
-      <h2>视角</h2>
-      <div class="btns">
-        <button data-view="iso" class="on">等轴测</button>
-        <button data-view="top">正视图（顶）</button>
-        <button data-view="bottom">背视图（底）</button>
-        <button data-view="side">侧视图</button>
-      </div>
-      <label class="chk" style="margin-top:8px"><input type="checkbox" id="spin">自动旋转</label>
-    </section>
-
-    <section>
-      <h2>显示图层</h2>
-      <label class="chk"><input type="checkbox" id="tLabels" checked>元件标注与位置</label>
-      <label class="chk"><input type="checkbox" id="tZones" checked>功能分区色块</label>
-      <label class="chk"><input type="checkbox" id="tRuler" checked>尺寸标尺与刻度</label>
-      <label class="chk"><input type="checkbox" id="tSilk" checked>板面丝印（板名 / 接口线序）</label>
-      <label class="chk"><input type="checkbox" id="tSolder" checked>背板接线标注（看背视图）</label>
-      <label class="chk"><input type="checkbox" id="tPanel" checked>显示独立灯阵模块</label>
-      <label class="chk"><input type="checkbox" id="tExplode">爆炸视图</label>
-    </section>
-
-    <section>
-      <h2>灯阵演示</h2>
-      <select id="pattern">
-        <option value="demo">▶ 自动演示（自检→爱心→箭头→频谱）</option>
-        <option value="heart">品红色爱心（呼吸渐变）</option>
-        <option value="smile">黄色笑脸</option>
-        <option value="arrow">青色右箭头（位移动效）</option>
-        <option value="fft">频谱柱（8 段）</option>
-        <option value="waterfall">频谱瀑布（创新项）</option>
-        <option value="red">全屏红（上电自检）</option>
-        <option value="green">全屏绿（上电自检）</option>
-        <option value="blue">全屏蓝（上电自检）</option>
-        <option value="off">全部熄灭</option>
-      </select>
-      <div class="hint">演示动画对应题目指标 1.1（纯色自检）、1.2（三种预设图案）、1.3（呼吸 / 位移动效）、2.3–2.4（频谱柱）。</div>
-    </section>
-
-    <section>
-      <h2>元件清单与位置（点击定位）</h2>
-      <div class="bom" id="bom"></div>
-    </section>
-
-    <section>
-      <h2>洞洞板孔位约定</h2>
-      <table class="pinmap">
-        <tr><td>主板</td><td>90 × 70 mm → <b>31 列 × 24 行</b>孔（共 744 孔）</td></tr>
-        <tr><td>灯阵板</td><td>70 × 70 mm → <b>24 列 × 24 行</b>孔（共 576 孔）</td></tr>
-        <tr><td>孔距</td><td>2.54 mm（标准洞洞板 / 万用板）</td></tr>
-        <tr><td>边距</td><td>孔区离板边 5 mm；第 1 列 / 行孔心距板边 6.27 mm</td></tr>
-        <tr><td>原点</td><td>板<b>左下角</b>第一个孔 = 列 1 / 行 1</td></tr>
-        <tr><td>方向</td><td>列从左往右 1 → 31，行从下往上 1 → 24</td></tr>
-        <tr><td>读法</td><td>“列 13–34 · 行 3–12”= 该元件外框覆盖第 13 到 34 列、第 3 到 12 行的孔</td></tr>
-      </table>
-      <div class="hint">下面清单里每一行的蓝色小字就是该元件的孔位；点开详情还能看到占用孔数。图示见「2D 图」按钮里的网格版布局。</div>
-    </section>
-
-    <section>
-      <h2>选中元件</h2>
-      <div class="detail" id="detail"></div>
-    </section>
-
-    <section>
-      <h2>MCU 引脚分配（建议）</h2>
-      <table class="pinmap">
-        <tr><td>PA0</td><td>ADC1_IN0 ← 音频调理电路输出（经 1 k + 15 nF 抗混叠）</td></tr>
-        <tr><td>PA6</td><td>TIM3_CH1 → R7(100 Ω) → J5 第 2 脚 IN（灯阵数据，5 V 电平）</td></tr>
-        <tr><td>PA9 / PA10</td><td>USART1 TX / RX → 蓝牙模块 RXD / TXD（9600 bps 起）</td></tr>
-        <tr><td>PB5 / PB6 / PB7</td><td>按键 SW1 图案 / SW2 亮度 / SW3 速度</td></tr>
-        <tr><td>NRST</td><td>按键 SW4 → 复位（接最小系统板 NRST）</td></tr>
-        <tr><td>PA13 / PA14</td><td>SWDIO / SWCLK → 调试排针</td></tr>
-        <tr><td>PA4</td><td>预留（可做音频增益 / 灵敏度档位切换）</td></tr>
-        <tr><td>5V / GND</td><td>电源输入与地</td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2>器件出处对照（题目 / 讲座）</h2>
-      <table class="pinmap">
-        <tr><td>电源</td><td>P1 <b>剥皮短线直接焊</b>（列2/列4 行1）→ SW5 开关 → C4 470 µF → <b>5 V 母线沿板边走到 D1 → J5 第 1 脚 V+</b> → 3 根杜邦线 → 灯阵板；GND 同样一条母线走到 J5 第 3 脚</td></tr>
-        <tr><td>地</td><td>全部模块共地（星形接地，灯阵回流单独走线）</td></tr>
-        <tr><td>音频</td><td>J1 L/R → R4·R5(100 Ω) → C1(1 µF) → R1·R2(10 k 偏置 1.65 V) → U2A 跟随 → R3(1 k)+C3(15 nF) → J2 → U1 PA0</td></tr>
-        <tr><td>灯阵</td><td>U1 PA6 (TIM3_CH1) → R7(100 Ω) → J5 第 2 脚 IN；J5 第 1 脚 V+ 由 5 V 经 D1 降到约 4.4 V；J5 第 3 脚 G 共地。灯阵板自带 3 根杜邦线直接插在 J5 上</td></tr>
-        <tr><td>蓝牙</td><td>U1 PA9 ↔ U3 RXD，U1 PA10 ↔ U3 TXD（交叉），U3 的 5V → 5V 母线、GND → 地（共地）；<b>U3 竖插在 J8 的 1×6 排母上（列 30 · 行 18–23）</b>——模块卡片侧身立、长边朝上，板面只占一条 3 × 13.2 mm 的窄带、立高约 27 mm，天线在卡片顶端；STATE 与 3.3V 两个脚留空</td></tr>
-        <tr><td>按键</td><td>SW1→PB5、SW2→PB6、SW3→PB7、SW4→NRST；每个按键两端并 100 nF（C12–C15），另一端共地</td></tr>
-        <tr><td>调试</td><td><b>板上不占位置</b>：烧程序直接用最小系统板自带的 Micro-USB（DFU）；要在线调试时，把 ST-Link 夹在 U1 排针的 PA13 / PA14 / 3V3 / GND 上即可</td></tr>
-        <tr><td>测试</td><td>J2 = ADC 输入测试端口（1 脚信号 / 2 脚 GND），对应题目指标 2.2</td></tr>
-      </table>
-      <div class="hint">每根线在接线页里有对应颜色（5V 红 · GND 黑 · PA9 白 · PA10 绿 · PA6 黄 · PA0 蓝 · 按键 橙 · SWD 紫）。</div>
-    </section>
-
-    <section>
-      <h2>器件出处对照（题目 / 讲座）</h2>
-      <table class="pinmap">
-        <tr><td>WS2812B 灯珠</td><td>讲座 P7、P10–P12、P29–P30；题目三-6 允许自制灯阵（≥8 像素短边、≥64 颗）</td></tr>
-        <tr><td>C8T6 最小系统板</td><td>讲座 P12「建议使用学生电源，c8t6 最小系统板支持 5V 供电」、P20–P24</td></tr>
-        <tr><td>BT36 / BT24</td><td>讲座 P31「常见的蓝牙串口模块有 BT36（主从一体）、BT24（仅从机）」</td></tr>
-        <tr><td>3.5 mm 插座</td><td>讲座 P13–P15（尺寸 + 触点形式，需实测 Tip / Ring / Sleeve）</td></tr>
-        <tr><td>运算放大器</td><td>讲座 P18「有源方案：运算放大器（拓展）」</td></tr>
-        <tr><td>电阻 / 电容偏置</td><td>讲座 P16–P18（无源偏置方案、偏置目标与波形）</td></tr>
-        <tr><td>按键 + 滤波电容</td><td>讲座 P26–P27「在按键两端加入容值合适的电容」</td></tr>
-        <tr><td>学生电源</td><td>讲座 P9、P12（仪器使用 + 灯阵供电建议）</td></tr>
-        <tr><td>ST-Link / SWD</td><td>讲座 P9、P12（下载调试；警告勿用 ST-Link 的 5V 给灯阵供电）</td></tr>
-        <tr><td>测试端口</td><td>题目三-2「留出必要的测试端口供功能测试」、二-2.2 ADC 测试端口</td></tr>
-      </table>
-      <div class="hint">其余为工艺器件（排针、3 根杜邦线）与保护器件（1N4148 钳位、1N5408 灯阵支路降压兼防反接），不属于题面给定器件，可按需取舍。全板只用直插元件，没有任何贴片件。</div>
-    </section>
-
-    <section>
-      <h2>拓展指标实现方式</h2>
-      <table class="pinmap">
-        <tr><td>2.1 蓝牙</td><td>BT36 串口模块接 USART1（PA9 / PA10），手机端用蓝牙串口助手：远程调亮度与速度、下发 8 字节 8×8 位图并在灯阵显示</td></tr>
-        <tr><td>2.2 音频输入</td><td>J1（PJ-320A）→ 自研调理（100 Ω + 1 µF 隔直 + 10 k/10 k 偏置 + MCP6002 跟随 + 1 k/15 nF 抗混叠）→ J2 ADC 测试端口 → PA0</td></tr>
-        <tr><td>2.3 频谱柱</td><td>软件 FFT / Goertzel 输出 8 根频谱柱；硬件负责采样率稳定：TIM 触发 ADC + DMA 搬运，抗混叠 10.6 kHz</td></tr>
-        <tr><td>2.4 实时性</td><td>256 点 FFT 双缓冲，刷新 ≥ 30 fps，频谱响应延迟 &lt; 0.3 s（指标要求 ≤ 1 s）</td></tr>
-        <tr><td>2.5 其他</td><td>自制洞洞板、自制 8×8 灯阵板、附加灯效（呼吸 / 位移 / 彩虹 / 频谱柱 / 频谱瀑布）；<b>独立供电按要求不做</b></td></tr>
-      </table>
-      <div class="hint">2.1–2.5 里只有独立供电不做；其余全部由现有器件 + 软件完成，不需要再加硬件。</div>
-    </section>
-
-    <section>
-      <h2>怎么打开 / 怎么分享</h2>
-      <div class="note">
-        3D 模型、元件清单、灯效演示<b>全部打包在这一个 .html 文件里</b>，不联网、不需要装任何东西，也不需要随附其它文件。<br><br>
-        <b>电脑：</b>双击文件，用 Chrome / Edge 打开。<br>
-        <b>手机：</b>保存文件后长按 → 「用其他应用打开」→ 浏览器；单指拖动旋转，双指捏合缩放，双指拖动平移。<br>
-        <b>微信 / QQ 里点开没反应？</b>内置预览不运行网页脚本，选「用其他应用打开」即可；也可以直接看随附的 PNG 预览图。
-      </div>
-    </section>
-
-    <section>
-      <h2>配色图例</h2>
-      <div class="legend">
-        <span><i style="background:#17614a"></i>绿色：主板</span>
-        <span><i style="background:#1f5fa8"></i>蓝色：主控模块</span>
-        <span><i style="background:#12315e"></i>深蓝：蓝牙模块</span>
-        <span><i style="background:#e8eef2"></i>白色：灯珠</span>
-        <span><i style="background:#2b2f36"></i>深灰：按键 / 排针</span>
-        <span><i style="background:#c9b189"></i>米色：瓷片电容</span>
-        <span><i style="background:#9fb6d0"></i>淡蓝：直插电阻</span>
-        <span><i style="background:#2f6b40"></i>墨绿：电源焊盘</span>
-        <span><i style="background:#b9c0c8"></i>银色：连接器</span>
-      </div>
-    </section>
-
-    <section>
-      <h2>设计要点</h2>
-      <div class="note">
-        <b>供电：</b>板载不含电池与充电电路，由外部 5 V 学生电源用<b>剥皮短线直接焊在两孔焊盘上</b>（列 2 / 列 4 · 行 1，旁边两孔穿扎带做应力释放），经总开关 → 470 µF 储能 → 5 V 母线送到全板；板上只做总开关 + 大容量储能 + 灯阵支路降压，符合“不要求独立电源”。<br><br>
-        <b>全直插：</b>板上元件全部是直插件（金属膜电阻、瓷片 / 独石 / 电解电容、DIP-8 运放、直插二极管、排针、电源焊盘），没有任何贴片件，普通烙铁就能焊。<br><br>
-        <b>结构：</b>灯阵单独做成 70 × 70 mm 小板，主板与灯阵板之间只用 <b>3 根杜邦线</b>（V+ / IN / V）连接；灯阵可以立在前面板上，主板藏进底座，两块板各自独立装配、独立更换。<br><br>
-        <b>灯阵电流：</b>64 颗全白理论上约 3.1 A，因此 3 根引线要选 24 AWG 以上、插针要压实，主板与灯阵板都用 ≥2 mm 宽铜并双面铺铜。软件限制亮度上限，实测工作电流建议 ≤ 1.2 A。<br><br>
-        <b>数据驱动与电平匹配：</b>PA6 用 TIM 的 PWM + DMA 产生 WS2812B 归零码（讲座 P29–P30 的思路），串 100 Ω（R7）后送 J5。WS2812B 在 5 V 供电时高电平门限约 3.5 V，3.3 V GPIO 直驱余量太小；本设计在灯阵 5 V 支路串一只 <b>1N5408</b>，把灯阵供电降到约 4.4 V，门限随之降到约 3.1 V，3.3 V 逻辑即可可靠驱动（同时兼防反接）。这一招比加电平缓冲芯片少一颗器件，而且仍是直插件。<br><br>
-        <b>模拟通道：</b>3.5 mm 插座 L / R 各串 100 Ω 后合并 → 1 µF 隔直 → 10 k/10 k 偏置到 1.65 V（10 µF 去耦）→ MCP6002 单位增益跟随（峰峰值不变）→ 1 k + 15 nF 抗混叠 → ADC 测试端口 + PA0。<br><br>
-        <b>插座的触点形式：</b>3.5 mm 只是尺寸，焊接前必须用通断档实测所选插座的 Tip / Ring / Sleeve 与焊脚对应关系，再回填封装。<br><br>
-        <b>掉电保存：</b>亮度与速度参数直接存在 STM32F103C8T6 内部 Flash 的最后一页（1 KB 一页，程序占用前几页），
-      </div>
-    </section>
-  </aside>
+  
 
   <main>
+  <div id="hiddenui" style="display:none">
+    <input type="checkbox" id="tLabels">
+    <input type="checkbox" id="tZones">
+    <input type="checkbox" id="tRuler">
+    <input type="checkbox" id="tSilk" checked>
+    <input type="checkbox" id="tSolder" checked>
+    <input type="checkbox" id="tPanel" checked>
+    <input type="checkbox" id="tExplode">
+    <input type="checkbox" id="spin">
+    <select id="pattern"><option value="demo" selected>demo</option></select>
+    <button id="btnSide"></button>
+    <button id="btnStatic"></button>
+    <div class="bom" id="bom"></div>
+    <div class="detail" id="detail"></div>
+  </div>
     <canvas id="c"></canvas>
     <div class="float">
       <button id="btnMain3D" onclick="window.open('mainboard.html','_blank')">主板 3D</button>
@@ -382,17 +231,16 @@
       <button id="btnReset">重置视角</button>
       <button id="btnSpin">自动旋转</button>
       <button id="btnFull">全屏</button>
-      <button id="btnSide">清单</button>
-      <button id="btnStatic">2D 图</button>
     </div>
-    <div class="hud">拖动 <b>左键</b> 旋转 · 滚轮 <b>缩放</b> · <b>右键</b> 平移 · 点击元件查看详情</div>
+    <div class="hud">拖动 <b>左键</b> 旋转 · 滚轮 <b>缩放</b> · <b>右键</b> 平移<br><b style="color:#ffbe3c">橙色实线</b>＝锡桥 / 引脚搭桥　<b style="color:#78b2e4">蓝灰虚线</b>＝跳线 / 母线</div>
     <div class="scalebox" id="scalebox"></div>
   </main>
 </div>
 
 <div id="static" class="staticwrap">
-<h1>炫彩音乐灯 · 8×8 灯阵主板（硬件 3D 方案）</h1><p class="lead">主板 <b>90 × 70 mm</b>（<b>31 列 × 24 行孔</b>）＋ 独立灯阵板 <b>70 × 70 mm</b>（24 列 × 24 行孔），板间只用 <b>3 根杜邦线</b>（主板丝印 V+ / IN / V，灯阵引线标注 V / IN / V+）。主控 STM32F103C8T6 最小系统板 ｜ 灯阵 8×8 WS2812B ｜ 3.5 mm 音频输入 + 自研调理 ｜ 蓝牙 BT36 ｜ 4 按键 ｜ <b>全直插、零贴片</b> ｜ 外部 5 V 学生电源（剥皮短线直接焊）。</p><p class="warn">这是<b>静态 2D 版</b>（当前打开方式没有运行网页脚本）。把文件保存后选「用其他应用打开 → 浏览器」，就能看到可旋转的 3D 模型。</p><h2>① 主板 2D 布局（90 × 70 mm ＝ 31 列 × 24 行孔，孔距 2.54 mm）</h2><div class="bwrap"><div class="bmain"><div class="gl v" style="left:6.970%"></div><div class="gl v" style="left:9.790%"></div><div class="gl v" style="left:12.610%"></div><div class="gl v" style="left:15.430%"></div><div class="gl v" style="left:18.260%"></div><div class="gl v" style="left:21.080%"></div><div class="gl v" style="left:23.900%"></div><div class="gl v" style="left:26.720%"></div><div class="gl v" style="left:29.540%"></div><div class="gl v" style="left:32.370%"></div><div class="gl v" style="left:35.190%"></div><div class="gl v" style="left:38.010%"></div><div class="gl v" style="left:40.830%"></div><div class="gl v" style="left:43.660%"></div><div class="gl v" style="left:46.480%"></div><div class="gl v" style="left:49.300%"></div><div class="gl v" style="left:52.120%"></div><div class="gl v" style="left:54.940%"></div><div class="gl v" style="left:57.770%"></div><div class="gl v" style="left:60.590%"></div><div class="gl v" style="left:63.410%"></div><div class="gl v" style="left:66.230%"></div><div class="gl v" style="left:69.060%"></div><div class="gl v" style="left:71.880%"></div><div class="gl v" style="left:74.700%"></div><div class="gl v" style="left:77.520%"></div><div class="gl v" style="left:80.340%"></div><div class="gl v" style="left:83.170%"></div><div class="gl v" style="left:85.990%"></div><div class="gl v" style="left:88.810%"></div><div class="gl v" style="left:91.630%"></div><div class="gl h" style="top:91.040%"></div><div class="gl h" style="top:87.410%"></div><div class="gl h" style="top:83.790%"></div><div class="gl h" style="top:80.160%"></div><div class="gl h" style="top:76.530%"></div><div class="gl h" style="top:72.900%"></div><div class="gl h" style="top:69.270%"></div><div class="gl h" style="top:65.640%"></div><div class="gl h" style="top:62.010%"></div><div class="gl h" style="top:58.390%"></div><div class="gl h" style="top:54.760%"></div><div class="gl h" style="top:51.130%"></div><div class="gl h" style="top:47.500%"></div><div class="gl h" style="top:43.870%"></div><div class="gl h" style="top:40.240%"></div><div class="gl h" style="top:36.610%"></div><div class="gl h" style="top:32.990%"></div><div class="gl h" style="top:29.360%"></div><div class="gl h" style="top:25.730%"></div><div class="gl h" style="top:22.100%"></div><div class="gl h" style="top:18.470%"></div><div class="gl h" style="top:14.840%"></div><div class="gl h" style="top:11.210%"></div><div class="gl h" style="top:7.590%"></div><div class="gnum" style="left:18.260%;bottom:1.2%">5</div><div class="gnum" style="left:32.370%;bottom:1.2%">10</div><div class="gnum" style="left:46.480%;bottom:1.2%">15</div><div class="gnum" style="left:60.590%;bottom:1.2%">20</div><div class="gnum" style="left:74.700%;bottom:1.2%">25</div><div class="gnum" style="left:88.810%;bottom:1.2%">30</div><div class="gnum" style="top:76.530%;left:1.6%">5</div><div class="gnum" style="top:58.390%;left:1.6%">10</div><div class="gnum" style="top:40.240%;left:1.6%">15</div><div class="gnum" style="top:22.100%;left:1.6%">20</div><div class="cmp" style="left:1.29%;top:15.34%;width:11.44%;height:17.14%;--c:#8f7bff">J1</div><div class="cmp" style="left:17.92%;top:20.44%;width:11.96%;height:3.31%;--c:#8f7bff">R4</div><div class="cmp" style="left:17.92%;top:27.70%;width:11.96%;height:3.31%;--c:#8f7bff">R5</div><div class="cmp" style="left:31.22%;top:22.73%;width:5.11%;height:6.00%;--c:#8f7bff">C1</div><div class="cmp" style="left:56.48%;top:10.79%;width:2.58%;height:15.37%;--c:#8f7bff"></div><div class="cmp" style="left:59.30%;top:10.79%;width:2.58%;height:15.37%;--c:#8f7bff"></div><div class="cmp" style="left:47.54%;top:25.79%;width:5.94%;height:7.14%;--c:#8f7bff">C2</div><div class="cmp" style="left:36.91%;top:16.97%;width:10.67%;height:13.89%;--c:#8f7bff">U2</div><div class="cmp" style="left:47.82%;top:16.83%;width:5.78%;height:3.46%;--c:#8f7bff">C5</div><div class="cmp" style="left:34.86%;top:13.19%;width:11.96%;height:3.31%;--c:#8f7bff">R3</div><div class="cmp" style="left:45.00%;top:9.57%;width:5.78%;height:3.46%;--c:#8f7bff">C3</div><div class="cmp" style="left:51.04%;top:7.59%;width:2.16%;height:7.26%;--c:#8f7bff"></div><div class="cmp" style="left:53.87%;top:7.59%;width:2.16%;height:7.26%;--c:#8f7bff"></div><div class="cmp" style="left:45.07%;top:5.77%;width:5.64%;height:3.63%;--c:#8f7bff">J2</div><div class="cmp" style="left:87.92%;top:10.64%;width:3.33%;height:19.16%;--c:#5ee6a8;opacity:.45;border-style:dashed"></div><div class="cmp" style="left:87.37%;top:9.40%;width:2.89%;height:21.77%;--c:#5ee6a8"></div><div class="cmp" style="left:8.56%;top:35.96%;width:8.11%;height:8.57%;--c:#ffcc57">SW1</div><div class="cmp" style="left:22.67%;top:35.96%;width:8.11%;height:8.57%;--c:#ffcc57">SW2</div><div class="cmp" style="left:8.56%;top:50.47%;width:8.11%;height:8.57%;--c:#ffcc57">SW3</div><div class="cmp" style="left:22.67%;top:50.47%;width:8.11%;height:8.57%;--c:#ffcc57">SW4</div><div class="cmp" style="left:11.13%;top:45.86%;width:5.78%;height:3.46%;--c:#ffcc57">C12–C15</div><div class="cmp" style="left:25.24%;top:45.86%;width:5.78%;height:3.46%;--c:#ffcc57">C12–C15</div><div class="cmp" style="left:11.13%;top:60.37%;width:5.78%;height:3.46%;--c:#ffcc57">C12–C15</div><div class="cmp" style="left:25.24%;top:60.37%;width:5.78%;height:3.46%;--c:#ffcc57">C12–C15</div><div class="cmp" style="left:35.17%;top:32.96%;width:59.39%;height:32.71%;--c:#4fa3ff">U1</div><div class="cmp" style="left:8.01%;top:85.16%;width:9.20%;height:11.37%;--c:#ffb066">P1</div><div class="cmp" style="left:21.89%;top:84.27%;width:9.67%;height:6.29%;--c:#ffb066">SW5</div><div class="cmp" style="left:35.22%;top:73.01%;width:11.17%;height:14.29%;--c:#ffb066">C4</div><div class="cmp" style="left:54.94%;top:87.19%;width:11.29%;height:7.71%;--c:#ffb066">D1</div><div class="cmp" style="left:74.37%;top:78.50%;width:11.96%;height:3.31%;--c:#ffb066">R7</div><div class="cmp" style="left:84.58%;top:81.97%;width:8.47%;height:3.63%;--c:#ffb066">J5</div><div style="position:absolute;left:35.17%;top:34.76%;width:59.39%;height:1.3%;background:#ffd24f"></div><div class="gnum" style="left:36.94%;top:31.76%;color:#ffe6a8">2×20P 第 1 排 · 行 16</div><div style="position:absolute;left:35.17%;top:60.16%;width:59.39%;height:1.3%;background:#ffd24f"></div><div class="gnum" style="left:36.94%;top:57.16%;color:#ffe6a8">2×20P 第 2 排 · 行 9</div><div class="gnum" style="left:84.13%;top:73.40%;color:#ffd24f">V+　IN　V</div><div class="gnum" style="left:93.71%;top:81.50%;color:#41dcff">灯阵杜邦线 →</div></div></div><p class="cap">网格线＝洞洞板每一列 / 每一行的孔；列号从左往右 1→31，行号从下往上 1→24，第 1 列 / 行孔心距板边 6.27 mm，图上左边缘 = X 0、下边缘 = Y 0。黄色两条是 C8T6 模块的 2×20P 双排排母（上排第 16 行、下排第 9 行，间距 7 个孔位＝17.78 mm），右端是 USB 口。方块颜色 = 功能区，没写位号的小元件（瓷片电容、直插电阻）见下方清单坐标。</p><h2>② 独立灯阵板（70 × 70 mm ＝ 24 列 × 24 行孔，8 × 8 WS2812B，间距 8 mm）</h2><div class="bwrap"><div class="bmain bpanel"><div class="gl v" style="left:8.960%"></div><div class="gl v" style="left:12.590%"></div><div class="gl v" style="left:16.210%"></div><div class="gl v" style="left:19.840%"></div><div class="gl v" style="left:23.470%"></div><div class="gl v" style="left:27.100%"></div><div class="gl v" style="left:30.730%"></div><div class="gl v" style="left:34.360%"></div><div class="gl v" style="left:37.990%"></div><div class="gl v" style="left:41.610%"></div><div class="gl v" style="left:45.240%"></div><div class="gl v" style="left:48.870%"></div><div class="gl v" style="left:52.500%"></div><div class="gl v" style="left:56.130%"></div><div class="gl v" style="left:59.760%"></div><div class="gl v" style="left:63.390%"></div><div class="gl v" style="left:67.010%"></div><div class="gl v" style="left:70.640%"></div><div class="gl v" style="left:74.270%"></div><div class="gl v" style="left:77.900%"></div><div class="gl v" style="left:81.530%"></div><div class="gl v" style="left:85.160%"></div><div class="gl v" style="left:88.790%"></div><div class="gl v" style="left:92.410%"></div><div class="gl h" style="top:91.040%"></div><div class="gl h" style="top:87.410%"></div><div class="gl h" style="top:83.790%"></div><div class="gl h" style="top:80.160%"></div><div class="gl h" style="top:76.530%"></div><div class="gl h" style="top:72.900%"></div><div class="gl h" style="top:69.270%"></div><div class="gl h" style="top:65.640%"></div><div class="gl h" style="top:62.010%"></div><div class="gl h" style="top:58.390%"></div><div class="gl h" style="top:54.760%"></div><div class="gl h" style="top:51.130%"></div><div class="gl h" style="top:47.500%"></div><div class="gl h" style="top:43.870%"></div><div class="gl h" style="top:40.240%"></div><div class="gl h" style="top:36.610%"></div><div class="gl h" style="top:32.990%"></div><div class="gl h" style="top:29.360%"></div><div class="gl h" style="top:25.730%"></div><div class="gl h" style="top:22.100%"></div><div class="gl h" style="top:18.470%"></div><div class="gl h" style="top:14.840%"></div><div class="gl h" style="top:11.210%"></div><div class="gl h" style="top:7.590%"></div><div class="gnum" style="left:23.470%;bottom:1.2%">5</div><div class="gnum" style="left:41.610%;bottom:1.2%">10</div><div class="gnum" style="left:59.760%;bottom:1.2%">15</div><div class="gnum" style="left:77.900%;bottom:1.2%">20</div><div class="gnum" style="top:76.530%;left:1.6%">5</div><div class="gnum" style="top:58.390%;left:1.6%">10</div><div class="gnum" style="top:40.240%;left:1.6%">15</div><div class="gnum" style="top:22.100%;left:1.6%">20</div><div class="cmp" style="left:8.17%;top:90.27%;width:5.20%;height:1.54%;--c:#ff8ad8"></div><div class="cmp" style="left:16.86%;top:90.27%;width:5.20%;height:1.54%;--c:#ff8ad8"></div><div class="leddot" style="left:6.71%;top:3.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:3.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:3.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:3.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:3.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:3.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:3.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:3.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:14.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:14.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:14.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:14.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:14.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:14.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:14.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:14.57%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:26.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:26.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:26.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:26.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:26.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:26.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:26.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:26.00%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:37.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:37.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:37.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:37.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:37.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:37.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:37.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:37.43%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:48.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:48.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:48.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:48.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:48.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:48.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:48.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:48.86%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:60.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:60.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:60.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:60.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:60.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:60.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:60.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:60.29%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:71.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:71.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:71.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:71.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:71.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:71.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:71.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:71.71%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:6.71%;top:83.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:18.14%;top:83.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:29.57%;top:83.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:41.00%;top:83.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:52.43%;top:83.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:63.86%;top:83.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:75.29%;top:83.14%;width:6.57%;height:6.57%"></div><div class="leddot" style="left:86.71%;top:83.14%;width:6.57%;height:6.57%"></div><div class="gnum" style="left:2.86%;top:70.57%;color:#ffd24f">V</div><div class="gnum" style="left:2.86%;top:74.29%;color:#ffd24f">IN</div><div class="gnum" style="left:2.86%;top:78.00%;color:#ffd24f">V+</div><div class="gnum" style="left:12.86%;top:95.14%;color:#41dcff">3 根杜邦线 → 主板 J5</div></div></div><p class="cap">8×8 灯珠按 8 mm 间距（≈3.15 个孔位）排布；这块灯板是赛题组配发的完整配件，板上不做改动。它自己引出 3 根杜邦线，标注为 <b>V / IN / V+</b>，一一对应插到主板 J5 的 V+ / IN / V（插反会烧灯珠）。板上并 2 只 10 µF 就近储能。</p><h2>③ 元件清单与洞洞板孔位（共 31 项，全部为直插件）</h2><p class="lead">读法：列 1–31 从左往右、行 1–24 从下往上（相对所在板左下角第一个孔）。「洞洞板孔位」= 该元件外框（含引脚）覆盖到的孔；位置 X / Y 是元件中心的坐标，原点也是所在板左下角。</p><table><thead><tr><th>板</th><th>位号 / 名称 / 具体型号</th><th>数量</th><th>洞洞板孔位</th><th>位置 X / Y（mm）</th></tr></thead><tbody><tr><td>主板</td><td><b>J1</b> 3.5 mm 音频输入插座<br><span class="dim">PJ-320A 3.5 mm 立体声母座（4 脚直插）</span></td><td>1</td><td>列 1–3 · 行 17–22</td><td>X 7.0 / Y 53.3</td></tr><tr><td>主板</td><td><b>R4</b> L 声道限流电阻<br><span class="dim">100 Ω 1/4 W 金属膜直插电阻（±1 %）</span></td><td>1</td><td>列 5–9 · 行 20–20</td><td>X 21.5 / Y 54.5</td></tr><tr><td>主板</td><td><b>R5</b> R 声道限流电阻<br><span class="dim">100 Ω 1/4 W 金属膜直插电阻（±1 %）</span></td><td>1</td><td>列 5–9 · 行 18–18</td><td>X 21.5 / Y 49.5</td></tr><tr><td>主板</td><td><b>C1</b> 输入隔直电容<br><span class="dim">1 µF 直插独石电容（50 V）</span></td><td>1</td><td>列 10–11 · 行 18–20</td><td>X 30.4 / Y 52.0</td></tr><tr><td>主板</td><td><b>R1</b> 偏置上电阻<br><span class="dim">10 kΩ 1/4 W 金属膜直插电阻（±1 %）</span></td><td>1</td><td>列 19–19 · 行 19–23</td><td>X 52.0 / Y 57.1</td></tr><tr><td>主板</td><td><b>R2</b> 偏置下电阻<br><span class="dim">10 kΩ 1/4 W 金属膜直插电阻（±1 %）</span></td><td>1</td><td>列 20–20 · 行 19–23</td><td>X 54.5 / Y 57.1</td></tr><tr><td>主板</td><td><b>C2</b> 偏置去耦电容<br><span class="dim">10 µF / 16 V 直插铝电解（Ø5 × 11 mm）</span></td><td>1</td><td>列 15–17 · 行 17–19</td><td>X 45.6 / Y 49.5</td></tr><tr><td>主板</td><td><b>U2</b> 信号调理运放<br><span class="dim">MCP6002-I/P（DIP-8 直插，轨到轨，单电源 1.8 ~ 6 V）</span></td><td>1</td><td>列 12–15 · 行 18–21</td><td>X 38.0 / Y 53.3</td></tr><tr><td>主板</td><td><b>C5</b> 运放高频去耦电容<br><span class="dim">100 nF 直插瓷片电容（50 V）</span></td><td>1</td><td>列 15–18 · 行 21–21</td><td>X 45.6 / Y 57.1</td></tr><tr><td>主板</td><td><b>R3</b> 抗混叠电阻<br><span class="dim">1 kΩ 1/4 W 金属膜直插电阻（±1 %）</span></td><td>1</td><td>列 11–15 · 行 22–22</td><td>X 36.8 / Y 59.6</td></tr><tr><td>主板</td><td><b>C3</b> 抗混叠电容<br><span class="dim">15 nF 直插瓷片电容（50 V）</span></td><td>1</td><td>列 14–17 · 行 23–23</td><td>X 43.1 / Y 62.1</td></tr><tr><td>主板</td><td><b>D2</b> ADC 输入钳位二极管<br><span class="dim">1N4148 × 2（DO-35 玻璃封装直插）</span></td><td>2</td><td>列 17–17 · 行 22–24、列 18–18 · 行 22–24</td><td>X 8.8 / Y 49.5</td></tr><tr><td>主板</td><td><b>J2</b> ADC 输入测试端口<br><span class="dim">1×2P 2.54 mm 直插排针 + Ø2 mm 测试环</span></td><td>1</td><td>列 15–17 · 行 24–24</td><td>X 43.1 / Y 64.7</td></tr><tr><td>主板</td><td><b>U3</b> 蓝牙串口模块（竖插·长边朝上）<br><span class="dim">BT36 蓝牙串口模块（主从一体，26.9 × 13.2 mm）；只需从机可用 BT24</span></td><td>1</td><td>列 30 · 行 18–23（6 个脚竖插在 J8 上，本体不落孔）</td><td>X 79.9 / Y 55.8</td></tr><tr><td>主板</td><td><b>J8</b> 蓝牙模块插座<br><span class="dim">1×6P 2.54 mm 直插排母（母座，模块竖插在上面）</span></td><td>1</td><td>列 29–31 · 行 17–24</td><td>X 79.9 / Y 55.8</td></tr><tr><td>主板</td><td><b>SW1</b> 按键：图案切换<br><span class="dim">6 × 6 × 5 mm 直插轻触开关（TS-1088 系列）</span></td><td>1</td><td>列 2–4 · 行 14–16</td><td>X 11.3 / Y 41.8</td></tr><tr><td>主板</td><td><b>SW2</b> 按键：亮度调节<br><span class="dim">6 × 6 × 5 mm 直插轻触开关（TS-1088 系列）</span></td><td>1</td><td>列 7–9 · 行 14–16</td><td>X 24.1 / Y 41.8</td></tr><tr><td>主板</td><td><b>SW3</b> 按键：速度调节<br><span class="dim">6 × 6 × 5 mm 直插轻触开关（TS-1088 系列）</span></td><td>1</td><td>列 2–4 · 行 10–12</td><td>X 11.3 / Y 31.7</td></tr><tr><td>主板</td><td><b>SW4</b> 按键：复位<br><span class="dim">6 × 6 × 5 mm 直插轻触开关（TS-1088 系列）</span></td><td>1</td><td>列 7–9 · 行 10–12</td><td>X 24.1 / Y 31.7</td></tr><tr><td>主板</td><td><b>C12–C15</b> 按键硬件滤波电容<br><span class="dim">100 nF 直插瓷片电容 × 4（50 V）</span></td><td>4</td><td>列 2–5 · 行 12–13、列 7–10 · 行 12–13、列 2–5 · 行 9–9、列 7–10 · 行 9–9</td><td>X 16.4 / Y 36.0</td></tr><tr><td>主板</td><td><b>U1</b> 主控最小系统板<br><span class="dim">STM32F103C8T6 最小系统板（Blue Pill：板载 8 MHz 晶振 + AMS1117-3.3 + Micro-USB）</span></td><td>1</td><td>列 11–31 · 行 8–17</td><td>X 58.3 / Y 35.5</td></tr><tr><td>主板</td><td><b>P1</b> 电源输入（剥皮短线直接焊）<br><span class="dim">不用端子：学生电源的线剥出 5 mm 左右铜芯，直接插进板上两个孔焊死；旁边两个孔穿扎带做应力释放</span></td><td>1</td><td>列 2 与列 4 · 行 1（5V / GND 各一根剥皮线直接焊死）</td><td>X 11.3 / Y 8.8</td></tr><tr><td>主板</td><td><b>SW5</b> 电源总开关<br><span class="dim">SS-12D00G3 拨动开关（3 脚 2 档直插）</span></td><td>1</td><td>列 6–10 · 行 1–3</td><td>X 24.1 / Y 8.8</td></tr><tr><td>主板</td><td><b>C4</b> 主储能电解电容<br><span class="dim">470 µF / 16 V 直插铝电解（Ø10 × 12.5 mm，耐压足够更保险）</span></td><td>1</td><td>列 11–15 · 行 2–6</td><td>X 36.8 / Y 13.9</td></tr><tr><td>主板</td><td><b>D1</b> 灯阵 5 V 支路降压二极管<br><span class="dim">1N5408 直插整流二极管（DO-201AD，3 A / 1000 V）</span></td><td>1</td><td>列 18–22 · 行 1–2</td><td>X 54.5 / Y 6.3</td></tr><tr><td>主板</td><td><b>R7</b> 数据线串阻<br><span class="dim">100 Ω 1/4 W 金属膜直插电阻（±1 %）</span></td><td>1</td><td>列 25–29 · 行 4–4</td><td>X 72.3 / Y 13.9</td></tr><tr><td>主板</td><td><b>J5</b> 灯阵接口（对外）<br><span class="dim">1×3P 2.54 mm 直插排针（公针，配杜邦线）</span></td><td>1</td><td>列 29–31 · 行 2–3</td><td>X 79.9 / Y 11.4</td></tr><tr><td>主板</td><td><b>W1</b> 灯阵连接线<br><span class="dim">3 根杜邦线（母-母，建议 20 cm）</span></td><td>3</td><td>板间 3 根杜邦线，不占孔位</td><td>X 95.0 / Y 12.0</td></tr><tr><td>灯阵板</td><td><b>LED1–LED64</b> WS2812B 全彩灯珠阵列<br><span class="dim">WS2812B-5050（5050RGB，内置驱动 IC，5 V）</span></td><td>64</td><td>列 1–24 · 行 2–24（灯珠直接焊在灯阵板上）</td><td>X 35.0 / Y 37.5</td></tr><tr><td>灯阵板</td><td><b>M1</b> 灯阵模块板<br><span class="dim">赛题组配发的 8×8 WS2812B 灯板（完整配件，板上不再改）</span></td><td>1</td><td>列 1–24 · 行 1–24（整板）</td><td>X 35.0 / Y 35.0</td></tr><tr><td>灯阵板</td><td><b>C10–C11</b> 灯阵板储能电容<br><span class="dim">10 µF / 16 V 直插铝电解（Ø5 × 11 mm）</span></td><td>2</td><td>列 1–2 · 行 1–1、列 3–5 · 行 1–1</td><td>X 10.5 / Y 6.3</td></tr></tbody></table><h2>④ 引脚脚距核对（能不能直接落在 2.54 mm 的孔上）</h2><table><thead><tr><th>元件</th><th>实际脚距</th><th>能否对准孔位</th><th>处理建议</th></tr></thead><tbody><tr><td>U1 STM32F103C8T6 模块</td><td>2×20P，2.54 mm</td><td>能</td><td>20 脚落在第 12–31 列，两排在第 16 / 9 行（间距 7 个孔位）</td></tr><tr><td>U2 MCP6002（DIP-8）</td><td>2.54 mm，两排间距 7.62 mm</td><td>能</td><td>4 脚落在第 5–8 列，两排在行 21 / 18（3 个孔位）</td></tr><tr><td>R1–R5、R7（1/4W 直插电阻）</td><td>引脚跨 4 个孔位（10.16 mm）</td><td>能</td><td>本体 6.3 mm，两脚落在相距 4 孔的孔上</td></tr><tr><td>D1 1N5408</td><td>引脚跨 4 个孔位（10.16 mm）</td><td>能</td><td>横放直插，本体长约 9.5 mm</td></tr><tr><td>D2 1N4148 × 2</td><td>引脚跨 2 个孔位（5.08 mm）</td><td>能</td><td>竖放直插，两只并排</td></tr><tr><td>C1–C3、C5、C10–C15（瓷片 / 独石 / 小电解）</td><td>2.54 mm</td><td>能</td><td>直接插相邻两孔</td></tr><tr><td>J2 / J5 / J8 排针</td><td>2.54 mm</td><td>能</td><td>1×N 直插排针，逐孔插入</td></tr><tr><td>P1 电源焊盘（剥皮短线直接焊）</td><td>两个孔（列 2 / 列 4 · 行 1）</td><td>能</td><td>学生电源的线剥出 5 mm 铜芯直接插孔焊死，旁边两孔穿扎带做应力释放</td></tr><tr><td>C4 470 µF 电解</td><td>脚距 5 mm（≈ 2 个孔位）</td><td>能</td><td>两脚直接插相邻两孔（只差 0.08 mm）</td></tr><tr><td>SW1–SW4 6×6 轻触开关</td><td>6.5 × 4.5 mm</td><td>否</td><td>不是 2.54 的整数倍；把四脚掰成「2 孔 × 1 孔」斜插，或飞 4 根短线</td></tr><tr><td>J1 PJ-320A 3.5 mm 插座（4 脚）</td><td>L / R / GND + 1 个开关脚</td><td>视品种而定</td><td>焊接前用通断档确认脚位，再按实物落孔；板上只按「信号进 / 地」两处定位</td></tr><tr><td>SW5 SS-12D00G3 拨动开关</td><td>3 脚 2.54 mm</td><td>能</td><td>直接插孔</td></tr><tr><td>LED1–64 WS2812B</td><td>8 mm</td><td>否（但不需要）</td><td>灯珠直接焊在灯阵板上，不用插孔</td></tr></tbody></table><p class="foot">本页是静态 2D 版；把本文件用 Chrome / Edge 打开即可看到可旋转、可点选的 3D 模型（含元件清单与灯效演示）。全板只用直插元件，没有任何贴片件。</p>
-
+<h1>炫彩音乐灯 · 接线 3D</h1>
+<p class="lead">这是<b>接线专用页</b>：显示主板与灯阵板的接线（橙色＝锡桥 / 引脚搭桥，蓝灰虚线＝跳线 / 母线）。当前打开方式没有运行网页脚本，请保存后选「用其他应用打开 → 浏览器」。</p>
+<p class="cap">主板 90 × 70 mm ｜ 灯阵板 70 × 70 mm ｜ 主板 31 列 × 24 行孔</p>
 </div>
 
 <script>
@@ -1962,6 +1810,7 @@ if (typeof ResizeObserver !== 'undefined'){
   window.addEventListener('resize', resize);
 }
 boot();
+setView('bottom');
 document.getElementById('scalebox').innerHTML =
   '主板 <b>' + BOARD.w + ' × ' + BOARD.h + ' mm</b> · 厚 <b>1.6 mm</b> · 灯阵板 <b>' + PANEL.w + ' × ' + PANEL.h + ' mm</b>'
   + '<br>灯阵 <b>8 × 8</b>（64 颗）· BOM <b>' + PARTS.length + '</b> 项';
